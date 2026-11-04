@@ -1,6 +1,6 @@
 // Shared menu and login for Safari Live and Safari Tick.
 (function () {
-  const PASS_HASH = 'ad2d3afc52205654b44082cb32f1636cfe0df9a7db7b11cd0712cd21078dc56d';
+  const PASS_HASH = '998ad19e808bf5071db74ee711377d5b4b59e0381fb26f8667286747e1708139';
   const NAMES = ['Cam', 'Melissa', 'Keegan', 'Mark', 'Tracy'];
   const page = document.body.dataset.page || 'dashboard';
   const ls = {
