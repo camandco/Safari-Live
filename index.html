@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Safari Live</title>
+<meta name="description" content="Live sightings from our Kruger and Pilanesberg trip">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23E0892F'/%3E%3Cpath d='M18 54V40h4v14zm8 0V40h4v14zm12 0V36h4v18zm8 0V36h4v18zM16 42q0-8 10-8l18-6q6 2 5 10l-21 6zM42 34l10-24 5 1-9 26z' fill='%233B2416'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--sand:#F4EBD9;--sand2:#EADBC0;--khaki:#C9B38A;--bush:#2F4F2F;--bush2:#4E6B3A;--ochre:#C8742B;--sunset:#E0892F;--dusk:#8C3B1E;--ink:#3E2723;--muted:#7A6450;--panel:#FFFBF3;--line:#E2D3B5;--gold:#E8B53C;--bad:#B3261E}
+@media (prefers-color-scheme:dark){:root{--sand:#1F1A14;--sand2:#2A231B;--khaki:#6E5C40;--bush:#8DB07A;--bush2:#A9C48F;--ochre:#E39A55;--dusk:#F0B07A;--ink:#F2E7D5;--muted:#BCA88C;--panel:#2A231B;--line:#3D3326}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--sand);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.45}
+.hero{position:relative;overflow:hidden;background:linear-gradient(180deg,#F6C46B 0%,#E0892F 45%,#8C3B1E 100%);color:#FFF8EC;padding:32px 16px 96px}
+.hero-in{max-width:1080px;margin:0 auto}
+.hero svg{position:absolute;left:0;right:0;bottom:0;width:100%;height:90px;display:block}
+.kick{font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.9;margin:0}
+h1{font-family:"DM Serif Display",Georgia,serif;font-weight:400;font-size:42px;line-height:1.05;margin:6px 0 0}
+.take{margin:10px 0 0;max-width:36rem;color:#FFF1DC}
+.take b{color:#fff}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px 40px;display:flex;flex-direction:column;gap:20px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:-44px;position:relative;z-index:2}
+.tile,.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+.tile{border-top:4px solid var(--ochre)}
+.tile:nth-child(2){border-top-color:var(--bush2)}.tile:nth-child(3){border-top-color:var(--gold)}.tile:nth-child(4){border-top-color:var(--dusk)}
+.tile .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.tile .v{font-family:"DM Serif Display",Georgia,serif;font-size:40px;line-height:1.1;margin-top:4px}
+.tile .v small{font-family:Inter,sans-serif;font-size:13px;color:var(--muted)}
+.tile .s{font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:12px}
+.card h2{font-family:"DM Serif Display",Georgia,serif;font-weight:400;font-size:22px;margin:0;color:var(--bush);display:flex;align-items:center;gap:8px}
+.card h2::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--ochre)}
+.note{font-size:12px;color:var(--muted);margin:4px 0 14px}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th{text-align:left;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:6px 4px;border-bottom:2px solid var(--khaki)}
+td{padding:9px 4px;border-bottom:1px dashed var(--line);vertical-align:top;overflow-wrap:anywhere}
+td.sp{font-weight:600;color:var(--bush)}
+.pill{display:inline-block;margin-top:2px;font-size:11px;padding:0 7px;border-radius:10px;background:var(--sand2);color:var(--dusk);font-weight:500}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+@media (max-width:560px){.wide{display:none}h1{font-size:34px}}
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar{display:grid;grid-template-columns:7.5rem 1fr 3rem;align-items:center;gap:10px}
+.track{height:14px;background:var(--sand2);border-radius:7px;overflow:hidden}
+.fill{height:100%;border-radius:7px;transition:width .8s ease}
+.bar .n{text-align:right;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.cols{display:flex;align-items:flex-end;gap:6px;height:160px;padding-top:20px;border-bottom:2px solid var(--khaki)}
+.col{flex:1;max-width:34px;border-radius:6px 6px 0 0;min-height:2px;position:relative;background:var(--sunset)}
+.col span{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:12px;color:var(--muted)}
+.days{display:flex;gap:6px;margin-top:4px}
+.days span{flex:1;max-width:34px;text-align:center;font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden}
+.b5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.b5 div{border-radius:10px;padding:10px 4px;text-align:center;font-size:12px;border:1px dashed var(--khaki);color:var(--muted);background:var(--sand)}
+.b5 div.on{background:var(--gold);border:1px solid var(--gold);color:#3E2723;font-weight:600}
+.b5 i{display:block;font-style:normal;font-size:20px}
+.empty{color:var(--muted);font-size:13px;font-style:italic;padding:6px 0}
+.foot{font-size:12px;color:var(--muted);text-align:center}
+.err{color:var(--bad)}
+.skel{display:inline-block;width:3ch;height:.8em;border-radius:4px;background:var(--sand2);animation:p 1.2s ease-in-out infinite}
+@keyframes p{50%{opacity:.4}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="hero-in">
+    <p class="kick">Kruger · Pilanesberg · Sun City</p>
+    <h1>Safari Live</h1>
+    <p class="take" id="take">Loading the latest sightings…</p>
+  </div>
+  <svg viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 95 Q150 80 300 92 T600 88 T900 94 T1200 86 V120 H0Z" fill="#3B2416"/>
+    <g fill="#3B2416">
+      <rect x="186" y="52" width="6" height="42"/><ellipse cx="189" cy="50" rx="62" ry="10"/><ellipse cx="170" cy="44" rx="30" ry="7"/><ellipse cx="212" cy="45" rx="28" ry="6"/>
+      <rect x="905" y="62" width="5" height="32"/><ellipse cx="907" cy="60" rx="46" ry="8"/><ellipse cx="925" cy="55" rx="22" ry="5"/>
+      <rect x="628" y="68" width="3" height="25"/><rect x="634" y="69" width="3" height="24"/><rect x="651" y="64" width="3" height="29"/><rect x="657" y="63" width="3" height="30"/><path d="M624 72 Q625 63 638 63 L656 57 Q663 60 661 68 L640 72 Z"/><path d="M654 60 L669 22 L674 23 L661 63 Z"/><ellipse cx="675" cy="23" rx="8" ry="3.5"/><rect x="668" y="15" width="1.6" height="6"/><rect x="671" y="14" width="1.6" height="6"/><path d="M625 66 L620 80 L622 80 L627 67 Z"/>
+      <path d="M720 92 c0-14 10-22 26-22 c10 0 16 4 20 10 l8-2 l2 6 l-6 2 c0 4-2 6-4 6 v-6 h-10 v6 h-8 v-6 h-12 v6z"/>
+    </g>
+  </svg>
+</header>
+
+<main class="wrap">
+  <section class="tiles">
+    <div class="tile"><div class="l">Sightings</div><div class="v" id="t-n"><span class="skel"></span></div><div class="s">logged by the group</div></div>
+    <div class="tile"><div class="l">Species</div><div class="v" id="t-s"><span class="skel"></span></div><div class="s">different animals and birds</div></div>
+    <div class="tile"><div class="l">Big Five</div><div class="v"><span id="t-b5"><span class="skel"></span></span> <small>of 5</small></div><div class="s">from the checklists</div></div>
+    <div class="tile"><div class="l">Checklists</div><div class="v" id="t-pct"><span class="skel"></span></div><div class="s">of all species ticked</div></div>
+  </section>
+
+  <section class="card">
+    <h2>Latest sightings</h2>
+    <p class="note">Newest first, the last 12 ticked.</p>
+    <table>
+      <thead><tr><th style="width:36%">Species</th><th style="width:20%">Who</th><th class="wide">Park</th><th style="width:24%">When</th></tr></thead>
+      <tbody id="feed"></tbody>
+    </table>
+    <div id="feed-empty"></div>
+  </section>
+
+  <div class="grid">
+    <section class="card"><h2>Spotters</h2><p class="note">Sightings ticked per person.</p><div class="bars" id="people"></div></section>
+    <section class="card"><h2>Big Five</h2><p class="note">Gold once ticked in either park.</p><div class="b5" id="big5"></div></section>
+  </div>
+
+  <div class="grid">
+    <section class="card"><h2>Sightings per day</h2><p class="note">Every sighting, by day.</p><div id="perday"></div></section>
+    <section class="card"><h2>Checklist progress</h2><p class="note">Share of each checklist ticked off.</p><div class="bars" id="lists"></div></section>
+  </div>
+
+  <section class="card"><h2>Sightings by park</h2><p class="note">Where the group has spotted the most.</p><div class="bars" id="parks"></div></section>
+
+  <p class="foot" id="foot">Updates by itself every few minutes.</p>
+</main>
+
+<script>
+// Published CSV links from the Google Sheet (File > Share > Publish to web)
+const LOG_CSV = 'PASTE_SIGHTINGS_LOG_CSV_LINK';
+const SUMMARY_CSV = 'PASTE_SUMMARY_CSV_LINK';
+const NAMES = ['Cam', 'Melissa', 'Keegan', 'Mark', 'Tracy'];
+
+const $ = (id) => document.getElementById(id);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+function parseCSV(text) {
+  const rows = []; let row = []; let cell = ''; let q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { row.push(cell); cell = ''; }
+    else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
+    else if (c !== '\r') cell += c;
+  }
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  return rows;
+}
+const when = (r) => { const t = Date.parse(`${r.date} ${new Date().getFullYear()} ${r.time || '00:00'}`); return Number.isNaN(t) ? 0 : t; };
+
+async function getCSV(url) {
+  const res = await fetch(url + (url.includes('?') ? '&' : '?') + 't=' + Date.now());
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return parseCSV(await res.text());
+}
+
+function bars(box, rows, color) {
+  box.replaceChildren();
+  const max = Math.max(1, ...rows.map((r) => r.max ?? r.value));
+  rows.forEach((r) => {
+    const b = el('div', 'bar');
+    const tr = el('div', 'track'); const f = el('div', 'fill'); f.style.background = color; f.style.width = '0%';
+    tr.appendChild(f); b.append(el('div', null, r.label), tr, el('div', 'n', r.text));
+    box.appendChild(b);
+    requestAnimationFrame(() => { f.style.width = `${Math.min(1, r.value / (r.max ?? max)) * 100}%`; });
+  });
+}
+
+function render(log, summary) {
+  const n = log.length;
+  const species = new Set(log.map((r) => r.species)).size;
+  const by = Object.fromEntries(NAMES.map((x) => [x, 0]));
+  log.forEach((r) => { if (r.who) by[r.who] = (by[r.who] || 0) + 1; });
+  const top = Object.entries(by).sort((a, b) => b[1] - a[1])[0];
+  $('t-n').textContent = n; $('t-s').textContent = species;
+
+  const take = $('take'); take.replaceChildren();
+  if (!n) take.textContent = 'No sightings yet. Tick a species on any checklist and it shows up here.';
+  else take.append(el('b', null, String(n)), ' sightings of ', el('b', null, String(species)), ' species so far. Top spotter: ', el('b', null, top && top[1] ? top[0] : 'nobody yet'), '.');
+
+  // feed
+  const feed = $('feed'); feed.replaceChildren(); $('feed-empty').replaceChildren();
+  [...log].sort((a, b) => when(b) - when(a)).slice(0, 12).forEach((r) => {
+    const tr = feed.insertRow();
+    const s = tr.insertCell(); s.className = 'sp'; s.textContent = r.species;
+    if (r.rarity) { s.appendChild(document.createElement('br')); s.appendChild(el('span', 'pill', r.rarity)); }
+    tr.insertCell().textContent = r.who || '-';
+    const p = tr.insertCell(); p.className = 'wide'; p.textContent = r.park;
+    tr.insertCell().textContent = `${r.date} ${r.time}`.trim();
+  });
+  if (!n) $('feed-empty').appendChild(el('div', 'empty', 'Nothing ticked yet.'));
+
+  bars($('people'), NAMES.map((x) => ({ label: x, value: by[x] || 0, text: String(by[x] || 0) })).sort((a, b) => b.value - a.value), 'var(--ochre)');
+
+  const parks = {}; log.forEach((r) => { parks[r.park] = (parks[r.park] || 0) + 1; });
+  bars($('parks'), ['Kruger', 'Pilanesberg'].map((p) => ({ label: p, value: parks[p] || 0, text: String(parks[p] || 0) })), 'var(--bush2)');
+
+  // per day
+  const pd = $('perday'); pd.replaceChildren();
+  const days = new Map(); log.forEach((r) => days.set(r.date, (days.get(r.date) || 0) + 1));
+  const dl = [...days].sort((a, b) => when({ date: a[0] }) - when({ date: b[0] }));
+  if (!dl.length) pd.appendChild(el('div', 'empty', 'Bars appear once sightings are ticked.'));
+  else {
+    const max = Math.max(...dl.map((d) => d[1]));
+    const cols = el('div', 'cols'); const lab = el('div', 'days');
+    dl.forEach(([d, c]) => { const col = el('div', 'col'); col.style.height = `${(c / max) * 100}%`; col.title = `${d}: ${c}`; col.appendChild(el('span', null, String(c))); cols.appendChild(col); lab.appendChild(el('span', null, d)); });
+    pd.append(cols, lab);
+  }
+
+  // summary: checklists + big five
+  const hi = summary.findIndex((r) => r[0] === 'Checklist');
+  const lists = [];
+  for (let i = hi + 1; hi >= 0 && i < summary.length && summary[i][0]; i++) {
+    const [name, seen, total, pct] = summary[i];
+    lists.push({ name, seen: +seen, total: +total, pct: parseFloat(pct) / 100 || 0 });
+  }
+  const all = lists.find((l) => l.name === 'All checklists');
+  $('t-pct').textContent = all ? `${Math.round(all.pct * 100)}%` : '-';
+  bars($('lists'), lists.filter((l) => l.name !== 'All checklists').map((l) => ({ label: l.name.replace('Pilanesberg', 'Pilanes.'), value: l.seen, max: l.total || 1, text: `${l.seen}/${l.total}` })), 'var(--bush2)');
+
+  const bi = summary.findIndex((r) => (r[0] || '').startsWith('Big Five ('));
+  const b5 = $('big5'); b5.replaceChildren(); let seen5 = 0;
+  for (let i = bi + 1; bi >= 0 && i <= bi + 5 && i < summary.length; i++) {
+    const [animal, status] = summary[i]; const on = status === 'Seen'; if (on) seen5++;
+    const d = el('div', on ? 'on' : ''); d.append(el('i', null, on ? '★' : '☆'), animal); b5.appendChild(d);
+  }
+  $('t-b5').textContent = seen5;
+  $('foot').textContent = `Updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. Refreshes by itself every few minutes.`;
+}
+
+async function load() {
+  try {
+    const [logRows, summary] = await Promise.all([getCSV(LOG_CSV), getCSV(SUMMARY_CSV)]);
+    const log = logRows.slice(1).filter((r) => r[4]).map((r) => ({ date: r[0], time: r[1], who: r[2], park: r[3], species: r[4], rarity: r[9] }));
+    render(log, summary);
+  } catch (e) {
+    $('foot').replaceChildren(el('span', 'err', 'Could not reach the sheet just now. Check your signal; it will try again shortly.'));
+  }
+}
+load();
+setInterval(load, 5 * 60 * 1000);
+</script>
+</body>
+</html>
