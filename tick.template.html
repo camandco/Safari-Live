@@ -171,7 +171,7 @@ function closeConfirm() { $('confirm').hidden = true; if (watch != null) navigat
 function save(tab, sp) {
   const item = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), tab, species: sp, who: me, ts: Date.now() };
   if (fix) { item.lat = +fix.latitude.toFixed(6); item.lng = +fix.longitude.toFixed(6); item.acc = Math.round(fix.accuracy); }
-  queue.push(item); persist(); closeConfirm(); lastSaved = item.id;
+  queue.push(item); persist(); keepStorage(); closeConfirm(); lastSaved = item.id;
   toast(`${sp} saved${item.lat ? ' with GPS' : ''}. ${navigator.onLine ? 'Syncing…' : 'Will sync when you have signal.'}`);
   render(); sync();
 }
@@ -182,7 +182,7 @@ $('cNo').onclick = closeConfirm;
 
 /* ---------- sync ---------- */
 let syncing = false; let syncMsg = '';
-const VERSION = 'v7';
+const VERSION = 'v8';
 async function sync(manual) {
   updateNet();
   if (!navigator.onLine) { if (manual) toast('No signal right now. Your ticks are safe on this phone.'); return; }
@@ -241,6 +241,9 @@ $('q').oninput = render;
 const setHH = () => document.documentElement.style.setProperty('--hh', $('hdr').offsetHeight + 'px'); addEventListener('resize', setHH);
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+// Ask the phone not to clear this app's saved ticks when space runs low
+const keepStorage = () => { try { if (navigator.storage && navigator.storage.persist) navigator.storage.persisted().then((ok) => { if (!ok) navigator.storage.persist(); }).catch(() => {}); } catch (e) {} };
+keepStorage();
 $('ver').textContent = VERSION; setHH(); render(); sync();
 </script>
 </body>
