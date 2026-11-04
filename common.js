@@ -56,7 +56,7 @@
   const head = el('div', 'sx-dhead'); const who = el('div', 'u');
   head.append(el('div', 'g', '🦒'), el('div', 't', 'Safari Live'), who);
   const links = el('div', 'sx-links');
-  [['dashboard', './', '📊', 'Dashboard'], ['tick', 'tick.html', '✅', 'Log sightings']].forEach(([id, href, ic, label]) => {
+  [['dashboard', './', '📊', 'Dashboard'], ['tick', 'tick.html', '✅', 'Log sightings'], ['help', 'help.html', '📖', 'How to use']].forEach(([id, href, ic, label]) => {
     const a = el('a', page === id ? 'on' : ''); a.href = href; a.append(el('i', null, ic), label); links.appendChild(a);
   });
   links.appendChild(el('div', 'sx-sep'));
