@@ -11,17 +11,26 @@
   const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
 
   const css = `
-  .sx-nav{position:sticky;top:0;z-index:60;background:#2A1A10;color:#FFF1DC;padding:calc(8px + env(safe-area-inset-top)) 12px 8px;display:flex;align-items:center;gap:8px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;box-shadow:0 2px 10px rgba(0,0,0,.25)}
-  .sx-brand{font-family:"DM Serif Display",Georgia,serif;font-size:18px;color:#F6C46B;margin-right:auto;white-space:nowrap}
-  .sx-tabs{display:flex;gap:4px;background:rgba(255,255,255,.08);border-radius:12px;padding:3px}
-  .sx-tabs a{color:#FFE9CC;text-decoration:none;font-size:14px;font-weight:600;padding:7px 12px;border-radius:9px;white-space:nowrap}
-  .sx-tabs a.on{background:#E0892F;color:#2A1A10}
-  .sx-user{border:0;background:#E8B53C;color:#2A1A10;font-weight:700;font-size:13px;border-radius:20px;padding:7px 11px;cursor:pointer;white-space:nowrap}
-  .sx-menu{position:absolute;right:10px;top:calc(100% + 6px);background:#FFFBF3;color:#3E2723;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.3);min-width:180px;overflow:hidden}
-  .sx-menu[hidden]{display:none}
-  .sx-menu button{display:block;width:100%;text-align:left;border:0;background:none;padding:12px 14px;font-size:15px;color:inherit;cursor:pointer}
-  .sx-menu button+button{border-top:1px solid #E2D3B5}
-  @media (max-width:520px){.sx-brand{font-size:0}.sx-brand::before{content:"🦒";font-size:20px}.sx-tabs a{padding:7px 10px;font-size:13px}}
+  .sx-nav{position:sticky;top:0;z-index:60;background:#2A1A10;color:#FFF1DC;padding:calc(8px + env(safe-area-inset-top)) 12px 8px;display:flex;align-items:center;gap:12px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+  .sx-burger{width:40px;height:40px;border:0;border-radius:10px;background:rgba(255,255,255,.1);display:grid;place-items:center;cursor:pointer;flex:none}
+  .sx-burger span{display:block;width:20px;height:2px;background:#FFE9CC;border-radius:2px;box-shadow:0 -6px 0 #FFE9CC,0 6px 0 #FFE9CC}
+  .sx-title{font-family:"DM Serif Display",Georgia,serif;font-size:19px;color:#F6C46B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sx-title small{font-family:Inter,sans-serif;font-size:13px;color:#C9B38A;margin-left:8px}
+  .sx-shade{position:fixed;inset:0;z-index:90;background:rgba(20,12,6,.5);opacity:0;pointer-events:none;transition:opacity .25s}
+  .sx-shade.open{opacity:1;pointer-events:auto}
+  .sx-drawer{position:fixed;top:0;bottom:0;left:0;z-index:91;width:min(82vw,300px);background:#FFFBF3;color:#3E2723;transform:translateX(-102%);transition:transform .3s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;box-shadow:8px 0 30px rgba(0,0,0,.3)}
+  .sx-drawer.open{transform:none}
+  .sx-dhead{background:linear-gradient(180deg,#E0892F,#8C3B1E);color:#FFF8EC;padding:calc(22px + env(safe-area-inset-top)) 18px 18px}
+  .sx-dhead .g{font-size:34px;line-height:1}
+  .sx-dhead .t{font-family:"DM Serif Display",Georgia,serif;font-size:24px;margin-top:6px}
+  .sx-dhead .u{font-size:13px;opacity:.9;margin-top:2px}
+  .sx-links{padding:10px 8px;display:flex;flex-direction:column;gap:2px}
+  .sx-links a,.sx-links button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;background:none;color:inherit;text-decoration:none;font-size:16px;font-weight:600;padding:13px 12px;border-radius:10px;cursor:pointer;font-family:inherit}
+  .sx-links a.on{background:#F3E4C8;color:#8C3B1E}
+  .sx-links a:hover,.sx-links button:hover{background:#F4EBD9}
+  .sx-links i{font-style:normal;width:24px;text-align:center;font-size:18px}
+  .sx-sep{height:1px;background:#E2D3B5;margin:8px 12px}
+  .sx-links button{font-weight:500;color:#7A6450}
   .sx-login{position:fixed;inset:0;z-index:100;background:linear-gradient(180deg,#F6C46B 0%,#E0892F 45%,#8C3B1E 100%);display:flex;align-items:center;justify-content:center;padding:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
   .sx-login[hidden]{display:none}
   .sx-card{background:#FFFBF3;color:#3E2723;width:min(100%,420px);border-radius:20px;padding:24px 20px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
@@ -38,22 +47,29 @@
 
   /* ---------- menu ---------- */
   const nav = el('nav', 'sx-nav');
-  nav.appendChild(el('div', 'sx-brand', 'Safari Live'));
-  const tabs = el('div', 'sx-tabs');
-  [['dashboard', './', 'Dashboard'], ['tick', 'tick.html', 'Log sightings']].forEach(([id, href, label]) => {
-    const a = el('a', page === id ? 'on' : '', label); a.href = href; tabs.appendChild(a);
-  });
-  nav.appendChild(tabs);
-  const user = el('button', 'sx-user', '…'); user.type = 'button';
-  const menu = el('div', 'sx-menu'); menu.hidden = true;
-  const sw = el('button', null, 'Switch person'); const out = el('button', null, 'Log out');
-  menu.append(sw, out);
-  nav.append(user, menu);
+  const burger = el('button', 'sx-burger'); burger.type = 'button'; burger.setAttribute('aria-label', 'Open menu'); burger.appendChild(el('span'));
+  const title = el('div', 'sx-title', page === 'tick' ? 'Log sightings' : 'Safari Live');
+  nav.append(burger, title);
   document.body.prepend(nav);
-  user.onclick = (e) => { e.stopPropagation(); menu.hidden = !menu.hidden; };
-  document.addEventListener('click', () => { menu.hidden = true; });
-  sw.onclick = () => { menu.hidden = true; showNames(); };
-  out.onclick = () => { menu.hidden = true; ls.del('me'); ls.del('code'); ls.del('authHash'); showPassword(); };
+  const shade = el('div', 'sx-shade');
+  const drawer = el('aside', 'sx-drawer'); drawer.setAttribute('aria-label', 'Menu');
+  const head = el('div', 'sx-dhead'); const who = el('div', 'u');
+  head.append(el('div', 'g', '🦒'), el('div', 't', 'Safari Live'), who);
+  const links = el('div', 'sx-links');
+  [['dashboard', './', '📊', 'Dashboard'], ['tick', 'tick.html', '✅', 'Log sightings']].forEach(([id, href, ic, label]) => {
+    const a = el('a', page === id ? 'on' : ''); a.href = href; a.append(el('i', null, ic), label); links.appendChild(a);
+  });
+  links.appendChild(el('div', 'sx-sep'));
+  const sw = el('button'); sw.type = 'button'; sw.append(el('i', null, '👤'), 'Switch person');
+  const out = el('button'); out.type = 'button'; out.append(el('i', null, '🔒'), 'Log out');
+  links.append(sw, out);
+  drawer.append(head, links);
+  document.body.append(shade, drawer);
+  const openMenu = (o) => { drawer.classList.toggle('open', o); shade.classList.toggle('open', o); };
+  burger.onclick = () => openMenu(true); shade.onclick = () => openMenu(false);
+  addEventListener('keydown', (e) => { if (e.key === 'Escape') openMenu(false); });
+  sw.onclick = () => { openMenu(false); showNames(); };
+  out.onclick = () => { openMenu(false); ls.del('me'); ls.del('code'); ls.del('authHash'); showPassword(); };
   const navH = () => document.documentElement.style.setProperty('--navh', nav.offsetHeight + 'px');
   addEventListener('resize', navH); navH();
 
@@ -90,7 +106,7 @@
     card.appendChild(grid);
     box.hidden = false;
   }
-  function refresh() { user.textContent = ls.get('me', '') || 'Sign in'; }
+  function refresh() { const m = ls.get('me', ''); who.textContent = m ? `Signed in as ${m}` : 'Not signed in'; title.replaceChildren(page === 'tick' ? 'Log sightings' : 'Safari Live'); if (m) title.appendChild(el('small', null, m)); }
 
   window.SafariAuth = { me: () => ls.get('me', ''), code: () => ls.get('code', ''), switchUser: showNames };
   refresh();

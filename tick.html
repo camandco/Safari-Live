@@ -182,7 +182,7 @@ $('cNo').onclick = closeConfirm;
 
 /* ---------- sync ---------- */
 let syncing = false; let syncMsg = '';
-const VERSION = 'v6';
+const VERSION = 'v7';
 async function sync(manual) {
   updateNet();
   if (!navigator.onLine) { if (manual) toast('No signal right now. Your ticks are safe on this phone.'); return; }
