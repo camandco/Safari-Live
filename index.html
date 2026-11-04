@@ -6,6 +6,11 @@
 <title>Safari Live</title>
 <meta name="description" content="Live sightings from our Kruger and Pilanesberg trip">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23E0892F'/%3E%3Cpath d='M18 54V40h4v14zm8 0V40h4v14zm12 0V36h4v18zm8 0V36h4v18zM16 42q0-8 10-8l18-6q6 2 5 10l-21 6zM42 34l10-24 5 1-9 26z' fill='%233B2416'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#8C3B1E">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--sand:#F4EBD9;--sand2:#EADBC0;--khaki:#C9B38A;--bush:#2F4F2F;--bush2:#4E6B3A;--ochre:#C8742B;--sunset:#E0892F;--dusk:#8C3B1E;--ink:#3E2723;--muted:#7A6450;--panel:#FFFBF3;--line:#E2D3B5;--gold:#E8B53C;--bad:#B3261E;--paper:#FBF3E1;--paper-ink:#3B2A1E}
@@ -25,6 +30,7 @@ html{overflow-x:clip}body{margin:0;background:var(--sand);color:var(--ink);font-
 h1{font-family:"DM Serif Display",Georgia,serif;font-weight:400;font-size:46px;line-height:1.05;margin:6px 0 0;text-shadow:0 2px 12px rgba(0,0,0,.15)}
 .take{margin:10px 0 0;max-width:36rem;color:#FFF1DC}
 .take b{color:#fff}
+.tickbtn{display:inline-block;margin:12px 8px 0 0;padding:9px 16px;border-radius:24px;background:#FFF8EC;color:#8C3B1E;font-weight:700;font-size:14px;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.18)}
 .clock{display:inline-block;margin-top:12px;font-size:12px;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.18);backdrop-filter:blur(4px)}
 .orb{position:absolute;border-radius:50%;z-index:1}
 .sun{width:90px;height:90px;background:radial-gradient(circle,#FFF6D6 0%,#FFD976 45%,rgba(255,200,90,0) 70%)}
@@ -115,6 +121,11 @@ h1{font-family:"DM Serif Display",Georgia,serif;font-weight:400;font-size:46px;l
 .rare-row .gem{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:16px;background:linear-gradient(135deg,#F7D774,#C98E1E);color:#3E2723}
 .rare-row .n{font-weight:600}.rare-row .w{font-size:12px;color:var(--muted)}
 
+/* ---------- map ---------- */
+#map{height:380px;border-radius:12px;overflow:hidden;border:1px solid var(--line);z-index:0}
+.maplink{color:var(--ochre);text-decoration:none;font-weight:600}
+.leaflet-popup-content{font-family:Inter,sans-serif;font-size:13px}
+.leaflet-popup-content b{font-family:Caveat,cursive;font-size:20px}
 /* ---------- spotters ---------- */
 .podium{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:end;gap:10px;margin:8px 0 18px;min-height:200px}
 .pod{display:flex;flex-direction:column;align-items:center;gap:6px}
@@ -153,7 +164,7 @@ h1{font-family:"DM Serif Display",Georgia,serif;font-weight:400;font-size:46px;l
     <p class="kick">Kruger · Pilanesberg · Sun City</p>
     <h1>Safari Live</h1>
     <p class="take" id="take">Loading the latest sightings…</p>
-    <span class="clock" id="clock"></span>
+    <a class="tickbtn" href="tick.html">+ Tick a sighting</a><span class="clock" id="clock"></span>
   </div>
   <svg class="ground" viewBox="0 0 1200 110" preserveAspectRatio="none" aria-hidden="true">
     <path d="M0 78 Q150 64 300 74 T600 70 T900 76 T1200 68 V110 H0Z" fill="#3B2416"/>
@@ -216,6 +227,12 @@ h1{font-family:"DM Serif Display",Georgia,serif;font-weight:400;font-size:46px;l
     <h2>Field journal</h2>
     <p class="note">The latest 12 sightings, newest first. Anything from the last 3 hours is marked new.</p>
     <div class="feed" id="feed"></div>
+  </section>
+
+  <section class="card" id="map-card">
+    <h2>Sightings map</h2>
+    <p class="note" id="map-note">Every sighting ticked with GPS in the Safari Tick app. Needs signal to load the map.</p>
+    <div id="map"></div>
   </section>
 
   <div class="grid">
@@ -331,7 +348,9 @@ function journal(log) {
     if (r.rarity) e.appendChild(el('span', 'stamp ' + rcls(r.rarity), r.rarity));
     e.appendChild(el('h3', 'sp', r.species));
     const by = el('div', 'by'); by.append('spotted by ', el('b', null, r.who || 'someone')); e.appendChild(by);
-    e.appendChild(el('div', 'meta', `${r.park} · ${r.date}${r.time ? ' · ' + r.time : ''}`));
+    const mt = el('div', 'meta', `${r.park} · ${r.date}${r.time ? ' · ' + r.time : ''}`);
+    if (r.lat != null) { const a = el('a', 'maplink', ' · 📍 map'); a.href = `https://www.google.com/maps?q=${r.lat},${r.lng}`; a.target = '_blank'; a.rel = 'noopener'; mt.appendChild(a); }
+    e.appendChild(mt);
     feed.appendChild(e);
   });
 }
@@ -409,6 +428,26 @@ function spotters(log) {
   bars($('people'), rank.map((s) => ({ label: s.n, value: s.total, text: String(s.total) })), 'var(--ochre)');
 }
 
+let map, layer;
+function drawMap(log) {
+  if (!window.L) { $('map-note').textContent = 'The map needs signal to load.'; return; }
+  if (!map) {
+    map = L.map('map', { scrollWheelZoom: false }).setView([-24.4, 30.4], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+    layer = L.layerGroup().addTo(map);
+  }
+  layer.clearLayers();
+  const pts = log.filter((r) => r.lat != null);
+  const col = { Cam: '#C8742B', Melissa: '#4E6B3A', Keegan: '#8C3B1E', Mark: '#2F6E8C', Tracy: '#9C4F9C' };
+  pts.forEach((r) => {
+    const rare = RARE.includes(r.rarity);
+    const m = L.circleMarker([r.lat, r.lng], { radius: rare ? 10 : 7, color: '#3E2723', weight: 2, fillColor: rare ? '#E8B53C' : (col[r.who] || '#C8742B'), fillOpacity: .95 });
+    const box = document.createElement('div'); box.append(el('b', null, r.species), document.createElement('br'), `${r.who || 'Someone'} · ${r.date} ${r.time}`.trim(), document.createElement('br'), r.rarity || '');
+    m.bindPopup(box); m.addTo(layer);
+  });
+  if (pts.length) map.fitBounds(L.latLngBounds(pts.map((r) => [r.lat, r.lng])).pad(0.3), { maxZoom: 13 });
+  $('map-note').textContent = pts.length ? `${pts.length} sighting${pts.length === 1 ? '' : 's'} with GPS. Gold dots are rare finds. Tap a dot for details.` : 'Pins appear here when sightings are ticked with GPS in the Safari Tick app.';
+}
 function render(log, summary) {
   const n = log.length; const species = new Set(log.map((r) => r.species)).size;
   $('t-n').textContent = n; $('t-s').textContent = species;
@@ -418,7 +457,7 @@ function render(log, summary) {
   if (!n) take.textContent = 'No sightings yet. Tick a species on any checklist and it shows up here.';
   else take.append(el('b', null, String(n)), ' sightings of ', el('b', null, String(species)), ' species so far. Top spotter: ', el('b', null, top ? top[0] : 'nobody yet'), '.');
 
-  bigFive(log, summary); journal(log); rare(log); spotters(log);
+  bigFive(log, summary); journal(log); rare(log); spotters(log); try { drawMap(log); } catch (e) {}
 
   const pd = $('perday'); pd.replaceChildren();
   const days = new Map(); log.forEach((r) => days.set(r.date, (days.get(r.date) || 0) + 1));
@@ -436,7 +475,7 @@ let lastKey = '';
 async function load() {
   try {
     const [logRows, summary] = await Promise.all([getCSV(LOG_CSV), getCSV(SUMMARY_CSV)]);
-    const log = logRows.slice(1).filter((r) => r[4]).map((r) => ({ date: r[0], time: r[1], who: r[2], park: r[3], species: r[4], group: r[8], rarity: r[9] }));
+    const log = logRows.slice(1).filter((r) => r[4]).map((r) => { const g = /^\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*$/.exec(r[5] || ''); return { date: r[0], time: r[1], who: r[2], park: r[3], species: r[4], group: r[8], rarity: r[9], lat: g ? +g[1] : null, lng: g ? +g[2] : null }; });
     const key = JSON.stringify([log, summary]);
     if (key !== lastKey) { lastKey = key; render(log, summary); }
     else $('foot').textContent = `Checked ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. Refreshes by itself every few minutes.`;
@@ -444,6 +483,7 @@ async function load() {
     $('foot').replaceChildren(el('span', 'err', 'Could not reach the sheet just now. Check your signal; it will try again shortly.'));
   }
 }
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 sky(); setInterval(sky, 10 * 60 * 1000);
 load(); setInterval(load, 5 * 60 * 1000);
 </script>

@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Safari Tick</title>
+<meta name="theme-color" content="#8C3B1E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Safari Tick">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root{--sand:#F4EBD9;--sand2:#EADBC0;--khaki:#C9B38A;--bush:#2F4F2F;--bush2:#4E6B3A;--ochre:#C8742B;--dusk:#8C3B1E;--ink:#3E2723;--muted:#7A6450;--panel:#FFFBF3;--line:#E2D3B5;--gold:#E8B53C;--ok:#2E7D32;--bad:#B3261E}
+@media (prefers-color-scheme:dark){:root{--sand:#1F1A14;--sand2:#2A231B;--khaki:#6E5C40;--bush:#9CC088;--bush2:#7FA266;--ochre:#E39A55;--ink:#F2E7D5;--muted:#BCA88C;--panel:#2A231B;--line:#3D3326}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--sand);color:var(--ink);font-family:Georgia,"Times New Roman",serif;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.4;padding-bottom:calc(90px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#E0892F 0%,#8C3B1E 100%);color:#FFF8EC;padding:calc(10px + env(safe-area-inset-top)) 14px 12px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{font-family:Georgia,serif;font-size:22px}
+.me{font-size:13px;background:rgba(255,255,255,.18);border:0;color:#fff;border-radius:20px;padding:5px 12px}
+.status{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px}
+.dot{width:9px;height:9px;border-radius:50%;background:#9be29b;flex:none}.dot.off{background:#ffb4a8}
+.sync{margin-left:auto;border:0;border-radius:20px;padding:5px 12px;background:#FFF8EC;color:#8C3B1E;font-weight:700;font-size:13px}
+.parks{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;background:rgba(0,0,0,.18);padding:4px;border-radius:12px}
+.parks button{border:0;border-radius:9px;padding:9px;font-size:15px;font-weight:600;background:transparent;color:#FFE9CC}
+.parks button.on{background:#FFF8EC;color:#8C3B1E}
+.tools{padding:12px 14px 4px;display:flex;flex-direction:column;gap:8px;position:sticky;top:var(--hh,150px);z-index:9;background:var(--sand)}
+.search{width:100%;font-size:16px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.chips button{flex:none;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:20px;padding:6px 13px;font-size:14px}
+.chips button.on{background:var(--bush2);border-color:var(--bush2);color:#fff}
+.list{padding:6px 14px;display:flex;flex-direction:column;gap:10px}
+.sp{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 12px 12px 14px}
+.sp h3{margin:0;font-size:17px;color:var(--bush)}
+.sp .meta{font-size:12px;color:var(--muted);margin-top:2px}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:10px;margin-right:6px;background:var(--sand2);color:var(--dusk)}
+.pill.c{color:#2E7D32}.pill.u{color:#E65100}.pill.r{color:#BF360C}.pill.v{color:#880E4F}
+.sp .seen{font-size:12px;color:var(--ok);font-weight:600;margin-top:4px}
+.sp .wait{color:var(--ochre)}
+.btn{border:0;border-radius:12px;padding:12px 14px;font-size:15px;font-weight:700;background:var(--ochre);color:#fff;min-width:84px}
+.btn.done{background:var(--sand2);color:var(--muted)}
+.sp.is-seen{opacity:.75}
+.empty{color:var(--muted);text-align:center;padding:30px 10px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translate(-50%,150%);transition:transform .35s;z-index:30;background:#3E2723;color:#FFF8EC;border-radius:14px;padding:12px 14px;display:flex;gap:12px;align-items:center;width:min(94vw,460px);box-shadow:0 10px 30px rgba(0,0,0,.3);font-size:14px}
+.toast.show{transform:translate(-50%,0)}
+.toast button{margin-left:auto;border:0;background:#FFF8EC;color:#3E2723;font-weight:700;border-radius:10px;padding:7px 12px}
+.sheet{position:fixed;inset:0;z-index:40;background:rgba(30,20,10,.55);display:flex;align-items:flex-end;justify-content:center}
+.sheet[hidden]{display:none}
+.card{background:var(--panel);width:min(100%,520px);border-radius:20px 20px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
+.card h2{margin:0 0 4px;font-family:Georgia,serif;font-weight:400;font-size:26px;color:var(--bush)}
+.card p{margin:4px 0 14px;color:var(--muted);font-size:14px}
+.names{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.names button{border:2px solid var(--line);background:var(--sand);color:var(--ink);border-radius:12px;padding:14px;font-size:17px;font-weight:600}
+.names button.on{border-color:var(--ochre);background:var(--ochre);color:#fff}
+.field{width:100%;font-size:18px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--sand);color:var(--ink);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px}
+.wide{width:100%}
+.gps{font-size:13px;color:var(--muted);margin:-6px 0 14px}
+.queue{padding:14px}
+.queue h4{margin:10px 0 6px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.qi{font-size:13px;padding:8px 0;border-bottom:1px dashed var(--line);display:flex;justify-content:space-between;gap:10px}
+.foot{font-size:12px;color:var(--muted);text-align:center;padding:16px}
+.foot a{color:var(--ochre)}
+.err{color:var(--bad)}
+</style>
+</head>
+<body>
+<header id="hdr">
+  <div class="top"><div class="brand">Safari Tick</div><button class="me" id="me">Set name</button></div>
+  <div class="status"><span class="dot" id="dot"></span><span id="net">Checking…</span><button class="sync" id="syncBtn">Sync</button></div>
+  <div class="parks"><button data-park="Kruger">Kruger</button><button data-park="Pilanesberg">Pilanesberg</button></div>
+</header>
+
+<div class="tools" id="tools">
+  <input class="search" id="q" type="search" placeholder="Search species…" autocomplete="off">
+  <div class="chips" id="chips">
+    <button data-f="all" class="on">All</button><button data-f="Mammals">Mammals</button><button data-f="Birds">Birds</button><button data-f="todo">Not seen yet</button><button data-f="big5">Big Five</button>
+  </div>
+</div>
+
+<div class="list" id="list"></div>
+
+<div class="queue" id="queue"></div>
+<p class="foot">See everyone's sightings on <a href="./">Safari Live</a>. Works without signal once added to your home screen.</p>
+
+<div class="toast" id="toast"><span id="toastT"></span><button id="undo">Undo</button></div>
+
+<div class="sheet" id="setup" hidden>
+  <div class="card">
+    <h2>Who's ticking?</h2>
+    <p>Pick your name. This phone will remember it.</p>
+    <div class="names" id="names"></div>
+    <p>Trip code (ask Cam if you don't have it)</p>
+    <input class="field" id="code" autocomplete="off" autocapitalize="characters" placeholder="Trip code">
+    <button class="btn wide" id="saveSetup">Let's go</button>
+    <p class="err" id="setupErr"></p>
+  </div>
+</div>
+
+<div class="sheet" id="confirm" hidden>
+  <div class="card">
+    <h2 id="cName"></h2>
+    <p id="cSub"></p>
+    <p class="gps" id="cGps">Getting your location…</p>
+    <button class="btn wide" id="cYes">Seen it</button>
+    <p></p>
+    <button class="btn wide done" id="cNo">Cancel</button>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = '__SCRIPT_URL__';
+const LOG_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTotl03LZgv5wXlVOdvTyVfAuV8-SBGbSiKh4qgMMcCRGJbKgHIKiyuXwOh6kTGwUXQ2FarxInyJath/pub?gid=900010&single=true&output=csv';
+const NAMES = ['Cam', 'Melissa', 'Keegan', 'Mark', 'Tracy'];
+const SPECIES = __SPECIES__;
+const RANK = { 'Very Common': 1, Common: 2, 'Fairly Common': 3, Uncommon: 4, Occasional: 5, Rare: 6, 'Very Rare': 7, 'Not typically present': 8 };
+
+const $ = (id) => document.getElementById(id);
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const ls = { get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } } };
+
+let me = ls.get('me', ''); let code = ls.get('code', ''); let park = ls.get('park', 'Kruger');
+let queue = ls.get('queue', []); let server = ls.get('server', {}); let filter = 'all'; let lastSaved = null;
+
+const parkOf = (tab) => tab.split(' ')[0];
+const key = (tab, sp) => tab + '|' + sp;
+const fmt = (ts) => new Date(ts).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Johannesburg' });
+const pillCls = (r) => ({ 'Very Common': 'c', Common: 'c', 'Fairly Common': 'c', Uncommon: 'u', Occasional: 'u', Rare: 'r', 'Very Rare': 'v' }[r] || '');
+
+/* ---------- list ---------- */
+function render() {
+  document.querySelectorAll('.parks button').forEach((b) => b.classList.toggle('on', b.dataset.park === park));
+  $('me').textContent = me ? me : 'Set name';
+  const q = $('q').value.trim().toLowerCase();
+  const pending = new Map(queue.map((i) => [key(i.tab, i.species), i]));
+  const rows = SPECIES.filter(([tab, sp, rar, cat]) => parkOf(tab) === park
+    && (filter === 'all' || (filter === 'Mammals' && tab.endsWith('Mammals')) || (filter === 'Birds' && tab.endsWith('Birds')) || (filter === 'big5' && cat === 'Big Five') || (filter === 'todo' && !server[key(tab, sp)] && !pending.has(key(tab, sp))))
+    && (!q || sp.toLowerCase().includes(q) || cat.toLowerCase().includes(q)))
+    .sort((a, b) => (RANK[a[2]] || 9) - (RANK[b[2]] || 9) || a[1].localeCompare(b[1]));
+  const list = $('list'); list.replaceChildren();
+  if (!rows.length) list.appendChild(el('div', 'empty', q ? 'No species match that search.' : 'Nothing left here. Nice spotting!'));
+  rows.forEach(([tab, sp, rar, cat, where]) => {
+    const s = server[key(tab, sp)]; const p = pending.get(key(tab, sp));
+    const card = el('div', 'sp' + (s || p ? ' is-seen' : ''));
+    const info = el('div');
+    info.appendChild(el('h3', null, sp));
+    const meta = el('div', 'meta'); meta.append(el('span', 'pill ' + pillCls(rar), rar), `${tab.endsWith('Birds') ? 'Bird' : 'Mammal'} · ${where}`);
+    info.appendChild(meta);
+    if (s) info.appendChild(el('div', 'seen', `✓ ${s.who || 'Seen'}${s.when ? ' · ' + s.when : ''}`));
+    else if (p) info.appendChild(el('div', 'seen wait', `⏳ ${p.who} · ${fmt(p.ts)} · waiting to sync`));
+    const b = el('button', 'btn' + (s || p ? ' done' : ''), s || p ? 'Seen' : 'Seen it');
+    if (!s && !p) b.onclick = () => ask(tab, sp, rar);
+    card.append(info, b); list.appendChild(card);
+  });
+  renderQueue();
+}
+function renderQueue() {
+  const box = $('queue'); box.replaceChildren();
+  if (!queue.length) return;
+  box.appendChild(el('h4', null, `Waiting to sync (${queue.length})`));
+  queue.slice().reverse().forEach((i) => { const r = el('div', 'qi'); r.append(el('span', null, `${i.species} · ${parkOf(i.tab)}`), el('span', null, `${i.who} · ${fmt(i.ts)}${i.lat ? ' · 📍' : ''}`)); box.appendChild(r); });
+}
+
+/* ---------- ticking ---------- */
+let fix = null; let watch = null;
+function ask(tab, sp, rar) {
+  if (!me || !code) { openSetup(); return; }
+  $('cName').textContent = sp;
+  $('cSub').textContent = `${parkOf(tab)} · ${rar} · spotted by ${me}`;
+  $('cGps').textContent = 'Getting your location…';
+  fix = null;
+  if ('geolocation' in navigator) {
+    watch = navigator.geolocation.watchPosition((p) => { fix = p.coords; $('cGps').textContent = `📍 Location found (within ${Math.round(p.coords.accuracy)} m)`; },
+      () => { $('cGps').textContent = 'No location (allow location access to add GPS). You can still save it.'; },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 60000 });
+  } else $('cGps').textContent = 'This phone can\'t share location. You can still save it.';
+  $('cYes').onclick = () => save(tab, sp);
+  $('confirm').hidden = false;
+}
+function closeConfirm() { $('confirm').hidden = true; if (watch != null) navigator.geolocation.clearWatch(watch); watch = null; }
+function save(tab, sp) {
+  const item = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), tab, species: sp, who: me, ts: Date.now() };
+  if (fix) { item.lat = +fix.latitude.toFixed(6); item.lng = +fix.longitude.toFixed(6); item.acc = Math.round(fix.accuracy); }
+  queue.push(item); persist(); closeConfirm(); lastSaved = item.id;
+  toast(`${sp} saved${item.lat ? ' with GPS' : ''}. ${navigator.onLine ? 'Syncing…' : 'Will sync when you have signal.'}`);
+  render(); sync();
+}
+function persist() { if (!ls.set('queue', queue)) toast('Could not save on this phone. Check storage space.'); }
+let tt; function toast(t) { $('toastT').textContent = t; $('toast').classList.add('show'); clearTimeout(tt); tt = setTimeout(() => $('toast').classList.remove('show'), 6000); }
+$('undo').onclick = () => { const i = queue.findIndex((x) => x.id === lastSaved); if (i >= 0) { queue.splice(i, 1); persist(); render(); toast('Removed.'); } else toast('Already synced, so it can only be unticked in the sheet.'); };
+$('cNo').onclick = closeConfirm;
+
+/* ---------- sync ---------- */
+let syncing = false;
+async function sync() {
+  updateNet();
+  if (syncing || !navigator.onLine) return;
+  syncing = true;
+  try {
+    if (queue.length) {
+      if (!SCRIPT_URL.startsWith('https://')) { $('net').textContent = 'Saved on this phone. Sync not set up yet.'; return; }
+      const batch = queue.slice(0, 50);
+      const res = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ code, items: batch }) });
+      const data = await res.json();
+      if (!data.ok) { if (data.error === 'bad_code') { toast('Trip code is wrong. Tap your name to fix it.'); } throw new Error(data.error || 'failed'); }
+      const done = new Set(data.results.filter((r) => ['saved', 'already', 'not_found', 'bad_tab', 'bad_name'].includes(r.status)).map((r) => r.id));
+      queue = queue.filter((i) => !done.has(i.id)); persist();
+      const n = data.results.filter((r) => r.status === 'saved').length;
+      if (n) toast(`${n} sighting${n === 1 ? '' : 's'} synced to the group.`);
+      if (queue.length) setTimeout(sync, 1500);
+    }
+    await pull();
+  } catch (e) {
+    $('net').textContent = `Couldn't sync just now. ${queue.length} waiting.`;
+  } finally { syncing = false; updateNet(); render(); }
+}
+async function pull() {
+  const res = await fetch(LOG_CSV + '&t=' + Date.now()); if (!res.ok) return;
+  const rows = parse(await res.text()).slice(1).filter((r) => r[4]);
+  const map = {}; rows.forEach((r) => { const tab = `${r[3]} ${r[8] === 'Bird' ? 'Birds' : 'Mammals'}`; map[key(tab, r[4])] = { who: r[2], when: `${r[0]} ${r[1]}`.trim() }; });
+  server = map; ls.set('server', server); ls.set('pulledAt', Date.now());
+}
+function parse(text) { const rows = []; let row = []; let cell = ''; let q = false; for (let i = 0; i < text.length; i++) { const c = text[i]; if (q) { if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c; } else if (c === '"') q = true; else if (c === ',') { row.push(cell); cell = ''; } else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; } else if (c !== '\r') cell += c; } if (cell || row.length) { row.push(cell); rows.push(row); } return rows; }
+function updateNet() {
+  const on = navigator.onLine; $('dot').classList.toggle('off', !on);
+  const w = queue.length ? ` · ${queue.length} waiting to sync` : '';
+  $('net').textContent = (on ? 'Online' : 'No signal, saving on this phone') + w;
+  $('syncBtn').hidden = !on;
+}
+$('syncBtn').onclick = () => sync();
+addEventListener('online', sync); addEventListener('offline', updateNet);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) sync(); });
+setInterval(sync, 60000);
+
+/* ---------- setup ---------- */
+function openSetup() {
+  const box = $('names'); box.replaceChildren(); let pick = me;
+  NAMES.forEach((n) => { const b = el('button', n === pick ? 'on' : '', n); b.onclick = () => { pick = n; box.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x.textContent === n)); }; box.appendChild(b); });
+  $('code').value = code; $('setupErr').textContent = '';
+  $('saveSetup').onclick = () => { const c = $('code').value.trim().toUpperCase(); if (!pick) { $('setupErr').textContent = 'Pick your name first.'; return; } if (!c) { $('setupErr').textContent = 'Enter the trip code.'; return; } me = pick; code = c; ls.set('me', me); ls.set('code', code); $('setup').hidden = true; render(); sync(); };
+  $('setup').hidden = false;
+}
+$('me').onclick = openSetup;
+
+/* ---------- controls ---------- */
+document.querySelectorAll('.parks button').forEach((b) => b.onclick = () => { park = b.dataset.park; ls.set('park', park); render(); scrollTo(0, 0); });
+$('chips').onclick = (e) => { const b = e.target.closest('button'); if (!b) return; filter = b.dataset.f; $('chips').querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); render(); };
+$('q').oninput = render;
+const setHH = () => document.documentElement.style.setProperty('--hh', $('hdr').offsetHeight + 'px'); addEventListener('resize', setHH);
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+setHH(); render(); if (!me || !code) openSetup(); sync();
+</script>
+</body>
+</html>
