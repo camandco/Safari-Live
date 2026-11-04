@@ -82,7 +82,7 @@ header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#E0892
 <div class="list" id="list"></div>
 
 <div class="queue" id="queue"></div>
-<p class="foot">See everyone's sightings on <a href="./">Safari Live</a>. Works without signal once added to your home screen.</p>
+<p class="foot">See everyone's sightings on <a href="./">Safari Live</a>. Works without signal once added to your home screen. <span id="ver"></span></p>
 
 <div class="toast" id="toast"><span id="toastT"></span><button id="undo">Undo</button></div>
 
@@ -192,18 +192,25 @@ $('undo').onclick = () => { const i = queue.findIndex((x) => x.id === lastSaved)
 $('cNo').onclick = closeConfirm;
 
 /* ---------- sync ---------- */
-let syncing = false;
-async function sync() {
+let syncing = false; let syncMsg = '';
+const VERSION = 'v5';
+async function sync(manual) {
   updateNet();
-  if (syncing || !navigator.onLine) return;
+  if (!navigator.onLine) { if (manual) toast('No signal right now. Your ticks are safe on this phone.'); return; }
+  if (syncing) return;
+  if (manual) toast(queue.length ? 'Syncing…' : 'Checking for new sightings…');
   syncing = true;
   try {
     if (queue.length) {
-      if (!SCRIPT_URL.startsWith('https://')) { $('net').textContent = 'Saved on this phone. Sync not set up yet.'; return; }
+      if (!SCRIPT_URL.startsWith('https://')) { syncMsg = 'Sync not set up yet'; return; }
       const batch = queue.slice(0, 50);
-      const res = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ code, items: batch }) });
-      const data = await res.json();
-      if (!data.ok) { if (data.error === 'bad_code') { toast('Trip code is wrong. Tap your name to fix it.'); } throw new Error(data.error || 'failed'); }
+      let res;
+      try { res = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ code, items: batch }), redirect: 'follow' }); }
+      catch (e) { throw new Error('Could not reach the sync script (network or permissions)'); }
+      const text = await res.text(); let data;
+      try { data = JSON.parse(text); } catch (e) { throw new Error(/<html/i.test(text) ? 'Sync script asked for a sign-in. Its access must be set to Anyone.' : 'Unexpected reply from the sync script'); }
+      if (!data.ok) throw new Error(data.error === 'bad_code' ? 'Trip code is wrong. Tap your name to fix it.' : 'Sync script error: ' + (data.error || 'unknown'));
+      syncMsg = '';
       const done = new Set(data.results.filter((r) => ['saved', 'already', 'not_found', 'bad_tab', 'bad_name'].includes(r.status)).map((r) => r.id));
       queue = queue.filter((i) => !done.has(i.id)); persist();
       const n = data.results.filter((r) => r.status === 'saved').length;
@@ -212,7 +219,8 @@ async function sync() {
     }
     await pull();
   } catch (e) {
-    $('net').textContent = `Couldn't sync just now. ${queue.length} waiting.`;
+    syncMsg = e.message || 'Sync failed';
+    if (manual) toast(syncMsg);
   } finally { syncing = false; updateNet(); render(); }
 }
 async function pull() {
@@ -225,13 +233,13 @@ function parse(text) { const rows = []; let row = []; let cell = ''; let q = fal
 function updateNet() {
   const on = navigator.onLine; $('dot').classList.toggle('off', !on);
   const w = queue.length ? ` · ${queue.length} waiting to sync` : '';
-  $('net').textContent = (on ? 'Online' : 'No signal, saving on this phone') + w;
+  $('net').textContent = (on ? 'Online' : 'No signal, saving on this phone') + w + (on && queue.length && syncMsg ? ` · ${syncMsg}` : '');
   $('syncBtn').hidden = !on;
 }
-$('syncBtn').onclick = () => sync();
-addEventListener('online', sync); addEventListener('offline', updateNet);
+$('syncBtn').onclick = () => sync(true);
+addEventListener('online', () => sync()); addEventListener('offline', updateNet);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) sync(); });
-setInterval(sync, 60000);
+setInterval(() => sync(), 60000);
 
 /* ---------- setup ---------- */
 function openSetup() {
@@ -250,7 +258,7 @@ $('q').oninput = render;
 const setHH = () => document.documentElement.style.setProperty('--hh', $('hdr').offsetHeight + 'px'); addEventListener('resize', setHH);
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
-setHH(); render(); if (!me || !code) openSetup(); sync();
+$('ver').textContent = VERSION; setHH(); render(); if (!me || !code) openSetup(); sync();
 </script>
 </body>
 </html>
