@@ -6,99 +6,208 @@
 <title>Safari Live</title>
 <meta name="description" content="Live sightings from our Kruger and Pilanesberg trip">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23E0892F'/%3E%3Cpath d='M18 54V40h4v14zm8 0V40h4v14zm12 0V36h4v18zm8 0V36h4v18zM16 42q0-8 10-8l18-6q6 2 5 10l-21 6zM42 34l10-24 5 1-9 26z' fill='%233B2416'/%3E%3C/svg%3E">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--sand:#F4EBD9;--sand2:#EADBC0;--khaki:#C9B38A;--bush:#2F4F2F;--bush2:#4E6B3A;--ochre:#C8742B;--sunset:#E0892F;--dusk:#8C3B1E;--ink:#3E2723;--muted:#7A6450;--panel:#FFFBF3;--line:#E2D3B5;--gold:#E8B53C;--bad:#B3261E}
-@media (prefers-color-scheme:dark){:root{--sand:#1F1A14;--sand2:#2A231B;--khaki:#6E5C40;--bush:#8DB07A;--bush2:#A9C48F;--ochre:#E39A55;--dusk:#F0B07A;--ink:#F2E7D5;--muted:#BCA88C;--panel:#2A231B;--line:#3D3326}}
+:root{--sand:#F4EBD9;--sand2:#EADBC0;--khaki:#C9B38A;--bush:#2F4F2F;--bush2:#4E6B3A;--ochre:#C8742B;--sunset:#E0892F;--dusk:#8C3B1E;--ink:#3E2723;--muted:#7A6450;--panel:#FFFBF3;--line:#E2D3B5;--gold:#E8B53C;--bad:#B3261E;--paper:#FBF3E1;--paper-ink:#3B2A1E}
+@media (prefers-color-scheme:dark){:root{--sand:#1F1A14;--sand2:#2A231B;--khaki:#6E5C40;--bush:#9CC088;--bush2:#7FA266;--ochre:#E39A55;--dusk:#F0B07A;--ink:#F2E7D5;--muted:#BCA88C;--panel:#2A231B;--line:#3D3326}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--sand);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.45}
-.hero{position:relative;overflow:hidden;background:linear-gradient(180deg,#F6C46B 0%,#E0892F 45%,#8C3B1E 100%);color:#FFF8EC;padding:32px 16px 96px}
-.hero-in{max-width:1080px;margin:0 auto}
-.hero svg{position:absolute;left:0;right:0;bottom:0;width:100%;height:90px;display:block}
+html{overflow-x:clip}body{margin:0;background:var(--sand);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.45;overflow-x:hidden}
+
+/* ---------- hero ---------- */
+.hero{position:relative;overflow:hidden;height:400px;color:#FFF8EC;transition:background 2s}
+.hero[data-sky=dawn]{background:linear-gradient(180deg,#6E7FB8 0%,#E9A3A0 40%,#F6C46B 75%,#F3A64F 100%)}
+.hero[data-sky=day]{background:linear-gradient(180deg,#3E8ED0 0%,#7DB9E6 50%,#D7E9F2 85%,#F1E2C0 100%)}
+.hero[data-sky=dusk]{background:linear-gradient(180deg,#F6C46B 0%,#E0892F 45%,#8C3B1E 100%)}
+.hero[data-sky=night]{background:linear-gradient(180deg,#070B1F 0%,#13204A 55%,#2C2850 100%)}
+.hero[data-sky=day] .hero-in{color:#16324A}.hero[data-sky=day] .take{color:#1F3F59}.hero[data-sky=day] .take b{color:#0E2236}
+.hero-in{position:relative;z-index:5;max-width:1080px;margin:0 auto;padding:32px 16px 0}
 .kick{font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.9;margin:0}
-h1{font-family:"DM Serif Display",Georgia,serif;font-weight:400;font-size:42px;line-height:1.05;margin:6px 0 0}
+h1{font-family:"DM Serif Display",Georgia,serif;font-weight:400;font-size:46px;line-height:1.05;margin:6px 0 0;text-shadow:0 2px 12px rgba(0,0,0,.15)}
 .take{margin:10px 0 0;max-width:36rem;color:#FFF1DC}
 .take b{color:#fff}
-.wrap{max-width:1080px;margin:0 auto;padding:0 16px 40px;display:flex;flex-direction:column;gap:20px}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:-44px;position:relative;z-index:2}
-.tile,.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+.clock{display:inline-block;margin-top:12px;font-size:12px;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,.18);backdrop-filter:blur(4px)}
+.orb{position:absolute;border-radius:50%;z-index:1}
+.sun{width:90px;height:90px;background:radial-gradient(circle,#FFF6D6 0%,#FFD976 45%,rgba(255,200,90,0) 70%)}
+.moon{width:54px;height:54px;background:#F4F1E6;box-shadow:0 0 40px 10px rgba(244,241,230,.25)}
+.moon::after{content:"";position:absolute;inset:-4px -14px 4px 14px;border-radius:50%;background:#13204A;opacity:.9}
+.stars{position:absolute;inset:0;z-index:0}
+.stars i{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;animation:tw 3s ease-in-out infinite}
+@keyframes tw{50%{opacity:.25}}
+.cloud{position:absolute;z-index:2;height:28px;border-radius:30px;background:rgba(255,255,255,.55);filter:blur(2px);animation:drift linear infinite}
+.cloud::before,.cloud::after{content:"";position:absolute;background:inherit;border-radius:50%}
+.cloud::before{width:50%;height:200%;left:15%;top:-90%}.cloud::after{width:35%;height:160%;right:15%;top:-60%}
+@keyframes drift{from{transform:translateX(-30vw)}to{transform:translateX(130vw)}}
+.bird{position:absolute;z-index:3;width:22px;height:10px;animation:fly linear infinite}
+.bird svg{width:100%;height:100%;animation:flap .5s ease-in-out infinite alternate}
+@keyframes fly{from{transform:translateX(-10vw)}to{transform:translateX(110vw)}}
+@keyframes flap{to{transform:scaleY(.4)}}
+.ground{position:absolute;left:0;bottom:0;width:100%;height:110px;z-index:3}
+.walker{position:absolute;bottom:26px;z-index:4;animation:walk linear infinite}
+.walker svg{display:block;animation:bob 1.2s ease-in-out infinite}
+@keyframes walk{from{transform:translateX(-160px)}to{transform:translateX(calc(100vw + 40px))}}
+@keyframes bob{50%{transform:translateY(-2px)}}
+.hero[data-sky=night] .walker svg,.hero[data-sky=night] .ground{filter:brightness(.55)}
+@media (prefers-reduced-motion:reduce){.cloud,.bird,.walker,.walker svg,.stars i,.bird svg{animation:none!important}.walker{left:60%}}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1080px;margin:0 auto;padding:20px 16px 48px;display:flex;flex-direction:column;gap:22px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tile,.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
 .tile{border-top:4px solid var(--ochre)}
 .tile:nth-child(2){border-top-color:var(--bush2)}.tile:nth-child(3){border-top-color:var(--gold)}.tile:nth-child(4){border-top-color:var(--dusk)}
 .tile .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
 .tile .v{font-family:"DM Serif Display",Georgia,serif;font-size:40px;line-height:1.1;margin-top:4px}
 .tile .v small{font-family:Inter,sans-serif;font-size:13px;color:var(--muted)}
 .tile .s{font-size:12px;color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:12px}
-.card h2{font-family:"DM Serif Display",Georgia,serif;font-weight:400;font-size:22px;margin:0;color:var(--bush);display:flex;align-items:center;gap:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:14px}
+.card h2{font-family:"DM Serif Display",Georgia,serif;font-weight:400;font-size:24px;margin:0;color:var(--bush);display:flex;align-items:center;gap:8px}
 .card h2::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--ochre)}
-.note{font-size:12px;color:var(--muted);margin:4px 0 14px}
-table{width:100%;border-collapse:collapse;table-layout:fixed}
-th{text-align:left;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:6px 4px;border-bottom:2px solid var(--khaki)}
-td{padding:9px 4px;border-bottom:1px dashed var(--line);vertical-align:top;overflow-wrap:anywhere}
-td.sp{font-weight:600;color:var(--bush)}
-.pill{display:inline-block;margin-top:2px;font-size:11px;padding:0 7px;border-radius:10px;background:var(--sand2);color:var(--dusk);font-weight:500}
-.num{text-align:right;font-variant-numeric:tabular-nums}
-@media (max-width:560px){.wide{display:none}h1{font-size:34px}}
+.note{font-size:12px;color:var(--muted);margin:4px 0 16px}
+.empty{color:var(--muted);font-size:13px;font-style:italic;padding:6px 0}
+.foot{font-size:12px;color:var(--muted);text-align:center}
+.err{color:var(--bad)}
+.skel{display:inline-block;width:3ch;height:.8em;border-radius:4px;background:var(--sand2);animation:p 1.2s ease-in-out infinite}
+@keyframes p{50%{opacity:.4}}
+
+/* ---------- big five ---------- */
+.b5{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:12px}
+.b5card{perspective:900px;height:170px}
+.b5in{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform 1s cubic-bezier(.2,.8,.2,1)}
+.b5card.on .b5in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px;text-align:center}
+.front{border:2px dashed var(--khaki);background:var(--sand);color:var(--muted)}
+.front svg{width:70px;height:46px;fill:var(--khaki);opacity:.8}
+.back{transform:rotateY(180deg);background:linear-gradient(135deg,#F7D774 0%,#E8B53C 45%,#C98E1E 100%);color:#3E2723;overflow:hidden;box-shadow:0 6px 18px rgba(201,142,30,.35)}
+.back::after{content:"";position:absolute;inset:-50%;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.55) 50%,transparent 60%);animation:shine 3.5s ease-in-out infinite}
+@keyframes shine{from{transform:translateX(-60%)}to{transform:translateX(60%)}}
+.back svg{width:70px;height:46px;fill:#3E2723}
+.b5name{font-weight:700;font-size:14px}
+.b5sub{font-size:11px;line-height:1.3}
+.b5sub b{font-family:Caveat,cursive;font-size:18px;display:block}
+
+/* ---------- journal feed ---------- */
+.feed{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:16px}
+.entry{position:relative;background:var(--paper);color:var(--paper-ink);border-radius:4px 4px 10px 4px;padding:16px 16px 14px 22px;box-shadow:0 1px 0 #d9c7a3,0 6px 14px rgba(60,40,20,.12);
+  background-image:linear-gradient(90deg,transparent 12px,rgba(200,116,43,.35) 12px,rgba(200,116,43,.35) 13px,transparent 13px),repeating-linear-gradient(180deg,transparent 0 25px,rgba(120,100,70,.14) 25px 26px);
+  opacity:0;animation:slidein .7s cubic-bezier(.2,.8,.2,1) forwards}
+.entry:nth-child(odd){transform:rotate(-.6deg)}.entry:nth-child(even){transform:rotate(.5deg)}
+@keyframes slidein{from{opacity:0;translate:0 18px}to{opacity:1;translate:0 0}}
+.entry .sp{font-family:Caveat,cursive;font-size:28px;line-height:1;font-weight:700;margin:0 0 6px;padding-right:70px}
+.entry .by{font-size:13px}.entry .by b{font-family:Caveat,cursive;font-size:20px}
+.entry .meta{font-size:11px;color:#7A6450;margin-top:6px;letter-spacing:.03em;text-transform:uppercase}
+.stamp{position:absolute;top:12px;right:10px;transform:rotate(8deg);border:2px solid currentColor;border-radius:6px;padding:1px 6px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.85;mix-blend-mode:multiply}
+.r-common{color:#2E7D32}.r-fair{color:#558B2F}.r-unc{color:#E65100}.r-rare{color:#BF360C}.r-vrare{color:#880E4F}.r-none{color:#616161}
+.new{position:absolute;top:-9px;left:14px;background:var(--bad);color:#fff;font-size:10px;font-weight:700;letter-spacing:.1em;padding:2px 8px;border-radius:10px;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.08)}}
+
+/* ---------- rare ---------- */
+.alert{position:fixed;top:14px;left:50%;z-index:50;width:min(92vw,520px);transform:translate(-50%,-160%);transition:transform .8s cubic-bezier(.2,1.3,.4,1);background:linear-gradient(135deg,#8C3B1E,#C8742B);color:#FFF8EC;border-radius:16px;padding:16px 46px 16px 18px;box-shadow:0 14px 40px rgba(0,0,0,.35)}
+.alert.show{transform:translate(-50%,0)}
+.alert .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.9}
+.alert .t{font-family:"DM Serif Display",Georgia,serif;font-size:24px;line-height:1.15;margin-top:2px}
+.alert button{position:absolute;top:10px;right:10px;border:0;background:rgba(255,255,255,.2);color:#fff;width:28px;height:28px;border-radius:50%;font-size:16px;cursor:pointer}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:49}
+.rare-list{display:flex;flex-direction:column;gap:10px}
+.rare-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--sand);border:1px solid var(--line)}
+.rare-row .gem{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:16px;background:linear-gradient(135deg,#F7D774,#C98E1E);color:#3E2723}
+.rare-row .n{font-weight:600}.rare-row .w{font-size:12px;color:var(--muted)}
+
+/* ---------- spotters ---------- */
+.podium{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:end;gap:10px;margin:8px 0 18px;min-height:200px}
+.pod{display:flex;flex-direction:column;align-items:center;gap:6px}
+.pod .who{font-family:Caveat,cursive;font-size:26px;font-weight:700;line-height:1}
+.pod .cnt{font-size:12px;color:var(--muted)}
+.pod .blk{width:100%;border-radius:10px 10px 0 0;display:flex;align-items:flex-start;justify-content:center;padding-top:8px;font-family:"DM Serif Display",Georgia,serif;font-size:30px;color:#3E2723;transform-origin:bottom;animation:rise 1s cubic-bezier(.2,.8,.2,1) both}
+.pod.p1 .blk{height:120px;background:linear-gradient(180deg,#F7D774,#C98E1E)}
+.pod.p2 .blk{height:88px;background:linear-gradient(180deg,#E9E9E9,#A8A8A8);animation-delay:.15s}
+.pod.p3 .blk{height:66px;background:linear-gradient(180deg,#F0B98A,#B7743F);animation-delay:.3s}
+@keyframes rise{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.crown{font-size:22px;line-height:1}
+.awards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.award{border-radius:12px;padding:10px 12px;background:var(--sand);border:1px solid var(--line)}
+.award .a{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ochre);font-weight:700}
+.award .w{font-family:Caveat,cursive;font-size:24px;font-weight:700;line-height:1.1}
+.award .d{font-size:11px;color:var(--muted)}
 .bars{display:flex;flex-direction:column;gap:10px}
 .bar{display:grid;grid-template-columns:7.5rem 1fr 3rem;align-items:center;gap:10px}
 .track{height:14px;background:var(--sand2);border-radius:7px;overflow:hidden}
-.fill{height:100%;border-radius:7px;transition:width .8s ease}
+.fill{height:100%;border-radius:7px;transition:width .9s ease}
 .bar .n{text-align:right;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
 .cols{display:flex;align-items:flex-end;gap:6px;height:160px;padding-top:20px;border-bottom:2px solid var(--khaki)}
 .col{flex:1;max-width:34px;border-radius:6px 6px 0 0;min-height:2px;position:relative;background:var(--sunset)}
 .col span{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:12px;color:var(--muted)}
 .days{display:flex;gap:6px;margin-top:4px}
 .days span{flex:1;max-width:34px;text-align:center;font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden}
-.b5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-.b5 div{border-radius:10px;padding:10px 4px;text-align:center;font-size:12px;border:1px dashed var(--khaki);color:var(--muted);background:var(--sand)}
-.b5 div.on{background:var(--gold);border:1px solid var(--gold);color:#3E2723;font-weight:600}
-.b5 i{display:block;font-style:normal;font-size:20px}
-.empty{color:var(--muted);font-size:13px;font-style:italic;padding:6px 0}
-.foot{font-size:12px;color:var(--muted);text-align:center}
-.err{color:var(--bad)}
-.skel{display:inline-block;width:3ch;height:.8em;border-radius:4px;background:var(--sand2);animation:p 1.2s ease-in-out infinite}
-@keyframes p{50%{opacity:.4}}
+@media (max-width:560px){h1{font-size:36px}.hero{height:360px}}
 </style>
 </head>
 <body>
-<header class="hero">
+<header class="hero" id="hero" data-sky="dusk">
+  <div class="stars" id="stars"></div>
+  <div class="orb" id="orb"></div>
+  <div id="sky-fx"></div>
   <div class="hero-in">
     <p class="kick">Kruger · Pilanesberg · Sun City</p>
     <h1>Safari Live</h1>
     <p class="take" id="take">Loading the latest sightings…</p>
+    <span class="clock" id="clock"></span>
   </div>
-  <svg viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">
-    <path d="M0 95 Q150 80 300 92 T600 88 T900 94 T1200 86 V120 H0Z" fill="#3B2416"/>
+  <svg class="ground" viewBox="0 0 1200 110" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 78 Q150 64 300 74 T600 70 T900 76 T1200 68 V110 H0Z" fill="#3B2416"/>
     <g fill="#3B2416">
-      <rect x="186" y="52" width="6" height="42"/><ellipse cx="189" cy="50" rx="62" ry="10"/><ellipse cx="170" cy="44" rx="30" ry="7"/><ellipse cx="212" cy="45" rx="28" ry="6"/>
-      <rect x="905" y="62" width="5" height="32"/><ellipse cx="907" cy="60" rx="46" ry="8"/><ellipse cx="925" cy="55" rx="22" ry="5"/>
-      <rect x="628" y="68" width="3" height="25"/><rect x="634" y="69" width="3" height="24"/><rect x="651" y="64" width="3" height="29"/><rect x="657" y="63" width="3" height="30"/><path d="M624 72 Q625 63 638 63 L656 57 Q663 60 661 68 L640 72 Z"/><path d="M654 60 L669 22 L674 23 L661 63 Z"/><ellipse cx="675" cy="23" rx="8" ry="3.5"/><rect x="668" y="15" width="1.6" height="6"/><rect x="671" y="14" width="1.6" height="6"/><path d="M625 66 L620 80 L622 80 L627 67 Z"/>
-      <path d="M720 92 c0-14 10-22 26-22 c10 0 16 4 20 10 l8-2 l2 6 l-6 2 c0 4-2 6-4 6 v-6 h-10 v6 h-8 v-6 h-12 v6z"/>
+      <rect x="186" y="34" width="6" height="42"/><ellipse cx="189" cy="32" rx="62" ry="10"/><ellipse cx="170" cy="26" rx="30" ry="7"/><ellipse cx="212" cy="27" rx="28" ry="6"/>
+      <rect x="985" y="44" width="5" height="32"/><ellipse cx="987" cy="42" rx="46" ry="8"/><ellipse cx="1005" cy="37" rx="22" ry="5"/>
+      <path d="M520 74 q20-22 40 0z"/><path d="M760 72 q12-14 24 0z"/>
     </g>
   </svg>
+  <div class="walker" style="animation-duration:95s" aria-hidden="true">
+    <svg width="70" height="92" viewBox="0 0 70 92" fill="#3B2416"><rect x="10" y="52" width="4" height="38"/><rect x="18" y="53" width="4" height="37"/><rect x="38" y="48" width="4" height="42"/><rect x="46" y="47" width="4" height="43"/><path d="M4 58 Q5 45 22 45 L44 37 Q53 41 51 52 L24 58 Z"/><path d="M42 41 L58 4 L64 6 L50 46 Z"/><ellipse cx="64" cy="6" rx="8" ry="4"/><rect x="57" y="-2" width="2" height="6"/><rect x="61" y="-3" width="2" height="6"/><path d="M5 50 L0 66 L2 66 L7 51 Z"/></svg>
+  </div>
+  <div class="walker" style="animation-duration:140s;animation-delay:-60s" aria-hidden="true">
+    <svg width="96" height="62" viewBox="0 0 96 62" fill="#3B2416"><path d="M8 30 Q8 6 40 6 Q66 6 70 24 Q78 22 82 30 Q88 42 84 56 L80 56 Q82 44 78 36 Q74 40 70 40 L68 60 L60 60 L58 44 L30 44 L28 60 L20 60 L18 44 Q8 42 8 30 Z"/><path d="M66 12 Q78 10 78 26 L72 28 Q72 18 64 18 Z" opacity=".85"/><path d="M8 26 L2 40 L4 41 L10 30 Z"/></svg>
+  </div>
 </header>
+
+<div class="alert" id="alert" role="status" aria-live="polite">
+  <div class="k">Rare sighting</div>
+  <div class="t" id="alert-t"></div>
+  <button id="alert-x" aria-label="Close">×</button>
+</div>
+<canvas id="confetti"></canvas>
 
 <main class="wrap">
   <section class="tiles">
-    <div class="tile"><div class="l">Sightings</div><div class="v" id="t-n"><span class="skel"></span></div><div class="s">logged by the group</div></div>
+    <div class="tile"><div class="l">Sightings</div><div class="v" id="t-n"><span class="skel"></span></div><div class="s">ticked by the group</div></div>
     <div class="tile"><div class="l">Species</div><div class="v" id="t-s"><span class="skel"></span></div><div class="s">different animals and birds</div></div>
-    <div class="tile"><div class="l">Big Five</div><div class="v"><span id="t-b5"><span class="skel"></span></span> <small>of 5</small></div><div class="s">from the checklists</div></div>
-    <div class="tile"><div class="l">Checklists</div><div class="v" id="t-pct"><span class="skel"></span></div><div class="s">of all species ticked</div></div>
+    <div class="tile"><div class="l">Big Five</div><div class="v"><span id="t-b5"><span class="skel"></span></span> <small>of 5</small></div><div class="s">in either park</div></div>
+    <div class="tile"><div class="l">Rare finds</div><div class="v" id="t-r"><span class="skel"></span></div><div class="s">rare or better</div></div>
   </section>
 
-  <section class="card">
-    <h2>Latest sightings</h2>
-    <p class="note">Newest first, the last 12 ticked.</p>
-    <table>
-      <thead><tr><th style="width:36%">Species</th><th style="width:20%">Who</th><th class="wide">Park</th><th style="width:24%">When</th></tr></thead>
-      <tbody id="feed"></tbody>
-    </table>
-    <div id="feed-empty"></div>
+  <section class="card" id="big-five">
+    <h2>The Big Five</h2>
+    <p class="note">Each badge flips to gold the moment someone ticks it.</p>
+    <div class="b5" id="big5"></div>
+  </section>
+
+  <section class="card" id="latest">
+    <h2>Field journal</h2>
+    <p class="note">The latest 12 sightings, newest first. Anything from the last 3 hours is marked new.</p>
+    <div class="feed" id="feed"></div>
   </section>
 
   <div class="grid">
-    <section class="card"><h2>Spotters</h2><p class="note">Sightings ticked per person.</p><div class="bars" id="people"></div></section>
-    <section class="card"><h2>Big Five</h2><p class="note">Gold once ticked in either park.</p><div class="b5" id="big5"></div></section>
+    <section class="card" id="spotters">
+      <h2>Spotters</h2>
+      <p class="note">Most sightings takes the podium. Awards go to the leaders in each category.</p>
+      <div class="podium" id="podium"></div>
+      <div class="awards" id="awards"></div>
+      <div class="bars" id="people"></div>
+    </section>
+    <section class="card" id="rare">
+      <h2>Rare finds</h2>
+      <p class="note">Every Occasional, Rare and Very Rare sighting.</p>
+      <div class="rare-list" id="rare-list"></div>
+    </section>
   </div>
 
   <div class="grid">
@@ -106,126 +215,214 @@ td.sp{font-weight:600;color:var(--bush)}
     <section class="card"><h2>Checklist progress</h2><p class="note">Share of each checklist ticked off.</p><div class="bars" id="lists"></div></section>
   </div>
 
-  <section class="card"><h2>Sightings by park</h2><p class="note">Where the group has spotted the most.</p><div class="bars" id="parks"></div></section>
-
   <p class="foot" id="foot">Updates by itself every few minutes.</p>
 </main>
 
 <script>
-// Published CSV links from the Google Sheet (File > Share > Publish to web)
 const LOG_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTotl03LZgv5wXlVOdvTyVfAuV8-SBGbSiKh4qgMMcCRGJbKgHIKiyuXwOh6kTGwUXQ2FarxInyJath/pub?gid=900010&single=true&output=csv';
 const SUMMARY_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTotl03LZgv5wXlVOdvTyVfAuV8-SBGbSiKh4qgMMcCRGJbKgHIKiyuXwOh6kTGwUXQ2FarxInyJath/pub?gid=900001&single=true&output=csv';
+const pl = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+const an = (w) => (/^[aeiou]/i.test(w) ? 'an ' : 'a ') + w;
 const NAMES = ['Cam', 'Melissa', 'Keegan', 'Mark', 'Tracy'];
+const RARE = ['Occasional', 'Rare', 'Very Rare', 'Not typically present'];
+const params = new URLSearchParams(location.search);
 
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
 
+/* ---------- sky ---------- */
+const saHour = () => { const p = params.get('hour'); if (p) return +p; return +new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hour12: false, timeZone: 'Africa/Johannesburg' }).format(new Date()); };
+function sky() {
+  const h = saHour();
+  const phase = params.get('sky') || (h < 5 || h >= 20 ? 'night' : h < 7 ? 'dawn' : h < 17 ? 'day' : 'dusk');
+  const hero = $('hero'); hero.dataset.sky = phase;
+  const orb = $('orb'); orb.className = 'orb ' + (phase === 'night' ? 'moon' : 'sun');
+  const pos = { dawn: [12, 58], day: [72, 14], dusk: [80, 50], night: [78, 12] }[phase];
+  orb.style.left = pos[0] + '%'; orb.style.top = pos[1] + '%';
+  const stars = $('stars'); stars.replaceChildren();
+  if (phase === 'night') for (let i = 0; i < 90; i++) { const s = el('i'); s.style.left = Math.random() * 100 + '%'; s.style.top = Math.random() * 70 + '%'; s.style.animationDelay = Math.random() * 3 + 's'; if (Math.random() < .2) { s.style.width = s.style.height = '3px'; } stars.appendChild(s); }
+  const fx = $('sky-fx'); fx.replaceChildren();
+  if (phase !== 'night') {
+    [[12, 140, 70], [28, 90, 95], [6, 110, 120]].forEach(([top, w, dur], i) => { const c = el('div', 'cloud'); c.style.top = top + 8 + '%'; c.style.width = w + 'px'; c.style.animationDuration = dur + 's'; c.style.animationDelay = -i * 30 + 's'; if (phase === 'dusk') c.style.background = 'rgba(255,214,170,.45)'; fx.appendChild(c); });
+    [[22, 28], [26, 31], [19, 34]].forEach(([top, dur], i) => { const b = el('div', 'bird'); b.style.top = top + i * 2 + '%'; b.style.animationDuration = dur + 's'; b.style.animationDelay = -i * 1.2 + 's'; b.innerHTML = '<svg viewBox="0 0 22 10"><path d="M0 2 Q6 0 11 7 Q16 0 22 2 Q16 3 11 10 Q6 3 0 2Z" fill="#2B1B10"/></svg>'; fx.appendChild(b); });
+  }
+  const label = { dawn: 'Sunrise in the bush', day: 'Midday on the savanna', dusk: 'Sundowner time', night: 'Night in the bush' }[phase];
+  $('clock').textContent = `${label} · ${new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Johannesburg' }).format(new Date())} in SA`;
+}
+
+/* ---------- data ---------- */
 function parseCSV(text) {
   const rows = []; let row = []; let cell = ''; let q = false;
   for (let i = 0; i < text.length; i++) {
     const c = text[i];
     if (q) { if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c; }
-    else if (c === '"') q = true;
-    else if (c === ',') { row.push(cell); cell = ''; }
-    else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
-    else if (c !== '\r') cell += c;
+    else if (c === '"') q = true; else if (c === ',') { row.push(cell); cell = ''; }
+    else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; } else if (c !== '\r') cell += c;
   }
   if (cell || row.length) { row.push(cell); rows.push(row); }
   return rows;
 }
 const when = (r) => { const t = Date.parse(`${r.date} ${new Date().getFullYear()} ${r.time || '00:00'}`); return Number.isNaN(t) ? 0 : t; };
+const mins = (r) => { const m = /^(\d{1,2}):(\d{2})/.exec(r.time || ''); return m ? +m[1] * 60 + +m[2] : null; };
+const rcls = (r) => ({ 'Very Common': 'r-common', Common: 'r-common', 'Fairly Common': 'r-fair', Uncommon: 'r-unc', Occasional: 'r-unc', Rare: 'r-rare', 'Very Rare': 'r-vrare' }[r] || 'r-none');
+async function getCSV(url) { const res = await fetch(url + '&t=' + Date.now()); if (!res.ok) throw new Error('HTTP ' + res.status); return parseCSV(await res.text()); }
 
-async function getCSV(url) {
-  const res = await fetch(url + (url.includes('?') ? '&' : '?') + 't=' + Date.now());
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  return parseCSV(await res.text());
+/* ---------- big five art (simple silhouettes) ---------- */
+const ART = {
+  Lion: '<svg viewBox="0 0 70 46"><circle cx="54" cy="16" r="13"/><circle cx="56" cy="17" r="7" opacity=".55"/><path d="M8 22 Q10 14 30 14 L46 16 Q50 30 46 32 L44 44 L39 44 L38 33 L20 33 L18 44 L13 44 L12 32 Q6 28 8 22Z"/><path d="M8 22 Q2 22 1 30 L3 31 Q4 25 9 25Z"/></svg>',
+  Leopard: '<svg viewBox="0 0 70 46"><path d="M10 22 Q14 14 34 14 L52 14 Q60 10 64 16 Q66 22 60 24 L54 24 L52 44 L47 44 L46 30 L22 30 L20 44 L15 44 L14 29 Q8 27 10 22Z"/><path d="M10 22 Q0 20 2 36 Q3 42 8 40 Q5 36 6 30 Q7 26 11 26Z"/><g fill="#F4EBD9" opacity=".55"><circle cx="24" cy="20" r="2"/><circle cx="32" cy="23" r="2"/><circle cx="40" cy="19" r="2"/><circle cx="46" cy="24" r="2"/><circle cx="28" cy="26" r="1.6"/></g></svg>',
+  Elephant: '<svg viewBox="0 0 70 46"><path d="M6 24 Q6 6 30 6 Q48 6 52 16 Q58 14 62 20 Q66 30 64 42 L60 42 Q61 32 58 26 Q55 29 52 29 L50 44 L44 44 L43 32 L22 32 L21 44 L15 44 L14 32 Q6 30 6 24Z"/><path d="M48 10 Q58 8 58 20 L54 22 Q54 14 47 14Z" opacity=".75"/></svg>',
+  Buffalo: '<svg viewBox="0 0 70 46"><path d="M8 24 Q8 10 30 10 L48 12 Q56 14 58 22 Q60 30 54 32 L52 44 L46 44 L45 32 L22 32 L20 44 L14 44 L13 32 Q8 30 8 24Z"/><path d="M50 12 Q46 4 54 4 Q64 4 66 12 Q60 8 56 11 Q60 14 64 14 Q58 18 52 15Z"/><path d="M8 22 L3 34 L5 35 L10 25Z"/></svg>',
+  Rhino: '<svg viewBox="0 0 70 46"><path d="M6 24 Q6 10 28 10 L46 12 Q54 14 58 20 L66 18 L62 24 L62 30 Q58 32 54 30 L52 44 L46 44 L45 32 L20 32 L19 44 L13 44 L12 32 Q6 30 6 24Z"/><path d="M58 20 L64 8 L66 18Z"/><path d="M54 16 L56 9 L58 16Z"/></svg>',
+};
+
+function bigFive(log, summary) {
+  const box = $('big5'); box.replaceChildren(); let count = 0;
+  const bi = summary.findIndex((r) => (r[0] || '').startsWith('Big Five ('));
+  const status = {}; if (bi >= 0) for (let i = bi + 1; i <= bi + 5 && i < summary.length; i++) status[summary[i][0]] = summary[i][1];
+  Object.keys(ART).forEach((animal, i) => {
+    const hits = log.filter((r) => r.species.startsWith(animal)).sort((a, b) => when(a) - when(b));
+    const first = hits[0]; const on = status[animal] === 'Seen' || !!first; if (on) count++;
+    const card = el('div', 'b5card');
+    const inner = el('div', 'b5in');
+    const front = el('div', 'face front'); front.innerHTML = ART[animal]; front.append(el('div', 'b5name', animal), el('div', 'b5sub', 'Not yet'));
+    const back = el('div', 'face back'); back.innerHTML = ART[animal];
+    const sub = el('div', 'b5sub');
+    if (first) { sub.append('Spotted by', el('b', null, first.who || 'the group'), `${first.date} ${first.time}`.trim()); } else sub.textContent = 'Spotted';
+    back.append(el('div', 'b5name', animal), sub);
+    inner.append(front, back); card.appendChild(inner); box.appendChild(card);
+    if (on) setTimeout(() => card.classList.add('on'), 400 + i * 220);
+  });
+  $('t-b5').textContent = count;
+}
+
+function journal(log) {
+  const feed = $('feed'); feed.replaceChildren();
+  const now = Date.now();
+  const latest = [...log].sort((a, b) => when(b) - when(a)).slice(0, 12);
+  if (!latest.length) { feed.appendChild(el('div', 'empty', 'The journal is empty. The first tick starts it.')); return; }
+  latest.forEach((r, i) => {
+    const e = el('article', 'entry'); e.style.animationDelay = i * 0.07 + 's';
+    if (now - when(r) < 3 * 3600 * 1000 && when(r) <= now + 600000) e.appendChild(el('span', 'new', 'NEW'));
+    if (r.rarity) e.appendChild(el('span', 'stamp ' + rcls(r.rarity), r.rarity));
+    e.appendChild(el('h3', 'sp', r.species));
+    const by = el('div', 'by'); by.append('spotted by ', el('b', null, r.who || 'someone')); e.appendChild(by);
+    e.appendChild(el('div', 'meta', `${r.park} · ${r.date}${r.time ? ' · ' + r.time : ''}`));
+    feed.appendChild(e);
+  });
+}
+
+function rare(log) {
+  const list = $('rare-list'); list.replaceChildren();
+  const rs = log.filter((r) => RARE.includes(r.rarity)).sort((a, b) => when(b) - when(a));
+  $('t-r').textContent = rs.length;
+  if (!rs.length) list.appendChild(el('div', 'empty', 'No rare finds yet. Keep your eyes on the thickets.'));
+  rs.forEach((r) => {
+    const row = el('div', 'rare-row');
+    const info = el('div'); info.append(el('div', 'n', r.species), el('div', 'w', `${r.who || 'Someone'} · ${r.park} · ${r.date} ${r.time}`.trim()));
+    row.append(el('div', 'gem', '◆'), info, el('span', 'stamp ' + rcls(r.rarity), r.rarity));
+    row.lastChild.style.position = 'static'; row.lastChild.style.transform = 'rotate(4deg)';
+    list.appendChild(row);
+  });
+  const newest = rs[0];
+  if (newest && Date.now() - when(newest) < 24 * 3600 * 1000) {
+    const key = 'rare-seen:' + newest.species + '|' + newest.date + '|' + newest.time;
+    if (!store.get(key) || params.has('alert')) {
+      $('alert-t').textContent = `${newest.who || 'Someone'} spotted ${an(newest.species)}!`;
+      setTimeout(() => { $('alert').classList.add('show'); confetti(); }, 900);
+      const close = () => { $('alert').classList.remove('show'); store.set(key, '1'); };
+      $('alert-x').onclick = close; setTimeout(close, 12000);
+    }
+  }
+}
+
+function confetti() {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c = $('confetti'); const x = c.getContext('2d'); c.width = innerWidth; c.height = innerHeight;
+  const cols = ['#E8B53C', '#C8742B', '#4E6B3A', '#8C3B1E', '#F6C46B', '#ffffff'];
+  const ps = Array.from({ length: 140 }, () => ({ x: c.width / 2, y: 90, vx: (Math.random() - .5) * 14, vy: Math.random() * -9 - 2, r: Math.random() * 6 + 3, c: cols[Math.floor(Math.random() * cols.length)], a: Math.random() * 6, s: Math.random() * .3 - .15 }));
+  let t = 0; (function f() { x.clearRect(0, 0, c.width, c.height); ps.forEach((p) => { p.vy += .28; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.a += p.s; x.save(); x.translate(p.x, p.y); x.rotate(p.a); x.fillStyle = p.c; x.fillRect(-p.r / 2, -p.r / 4, p.r, p.r / 2); x.restore(); }); if (++t < 170) requestAnimationFrame(f); else x.clearRect(0, 0, c.width, c.height); })();
 }
 
 function bars(box, rows, color) {
   box.replaceChildren();
   const max = Math.max(1, ...rows.map((r) => r.max ?? r.value));
   rows.forEach((r) => {
-    const b = el('div', 'bar');
-    const tr = el('div', 'track'); const f = el('div', 'fill'); f.style.background = color; f.style.width = '0%';
-    tr.appendChild(f); b.append(el('div', null, r.label), tr, el('div', 'n', r.text));
-    box.appendChild(b);
-    requestAnimationFrame(() => { f.style.width = `${Math.min(1, r.value / (r.max ?? max)) * 100}%`; });
+    const b = el('div', 'bar'); const tr = el('div', 'track'); const f = el('div', 'fill'); f.style.background = color; f.style.width = '0%';
+    tr.appendChild(f); b.append(el('div', null, r.label), tr, el('div', 'n', r.text)); box.appendChild(b);
+    requestAnimationFrame(() => requestAnimationFrame(() => { f.style.width = `${Math.min(1, r.value / (r.max ?? max)) * 100}%`; }));
   });
 }
 
-function render(log, summary) {
-  const n = log.length;
-  const species = new Set(log.map((r) => r.species)).size;
-  const by = Object.fromEntries(NAMES.map((x) => [x, 0]));
-  log.forEach((r) => { if (r.who) by[r.who] = (by[r.who] || 0) + 1; });
-  const top = Object.entries(by).sort((a, b) => b[1] - a[1])[0];
-  $('t-n').textContent = n; $('t-s').textContent = species;
+function spotters(log) {
+  const st = Object.fromEntries(NAMES.map((n) => [n, { n, total: 0, sp: new Set(), birds: 0, mammals: 0, rare: 0, early: null, late: null }]));
+  log.forEach((r) => {
+    const s = st[r.who]; if (!s) return;
+    s.total++; s.sp.add(r.species); if (r.group === 'Bird') s.birds++; if (r.group === 'Mammal') s.mammals++; if (RARE.includes(r.rarity)) s.rare++;
+    const m = mins(r); if (m != null) { if (s.early == null || m < s.early) s.early = m; if (s.late == null || m > s.late) s.late = m; }
+  });
+  const all = Object.values(st);
+  const rank = [...all].sort((a, b) => b.total - a.total || b.sp.size - a.sp.size);
+  const pod = $('podium'); pod.replaceChildren();
+  if (!rank[0].total) pod.appendChild(el('div', 'empty', 'The podium is waiting for the first tick.'));
+  else [[rank[1], 'p2', '2'], [rank[0], 'p1', '1'], [rank[2], 'p3', '3']].forEach(([s, cls, place]) => {
+    const p = el('div', 'pod ' + cls);
+    if (s && s.total) { if (place === '1') p.appendChild(el('div', 'crown', '♛')); p.append(el('div', 'who', s.n), el('div', 'cnt', pl(s.total, 'sighting', 'sightings'))); }
+    p.appendChild(el('div', 'blk', place)); pod.appendChild(p);
+  });
+  const fmtT = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+  const lead = (fn, better = (a, b) => a > b) => { let best = null; all.forEach((s) => { const v = fn(s); if (v == null || v === 0) return; if (!best || better(v, fn(best))) best = s; }); return best; };
+  const aw = [
+    ['Eagle Eye', 'most different species', lead((s) => s.sp.size), (s) => pl(s.sp.size, 'species', 'species')],
+    ['Bird Nerd', 'most birds', lead((s) => s.birds), (s) => pl(s.birds, 'bird', 'birds')],
+    ['Big Game', 'most mammals', lead((s) => s.mammals), (s) => pl(s.mammals, 'mammal', 'mammals')],
+    ['Rarity Hunter', 'most rare finds', lead((s) => s.rare), (s) => pl(s.rare, 'rare find', 'rare finds')],
+    ['Early Bird', 'earliest sighting of the day', lead((s) => s.early, (a, b) => a < b), (s) => `first at ${fmtT(s.early)}`],
+    ['Night Owl', 'latest sighting of the day', lead((s) => s.late), (s) => `last at ${fmtT(s.late)}`],
+  ];
+  const awards = $('awards'); awards.replaceChildren();
+  aw.forEach(([title, what, who, stat]) => { const a = el('div', 'award'); a.append(el('div', 'a', title), el('div', 'w', who ? who.n : '?'), el('div', 'd', who ? stat(who) : what)); awards.appendChild(a); });
+  bars($('people'), rank.map((s) => ({ label: s.n, value: s.total, text: String(s.total) })), 'var(--ochre)');
+}
 
+function render(log, summary) {
+  const n = log.length; const species = new Set(log.map((r) => r.species)).size;
+  $('t-n').textContent = n; $('t-s').textContent = species;
+  const by = {}; log.forEach((r) => { by[r.who] = (by[r.who] || 0) + 1; });
+  const top = Object.entries(by).filter(([k]) => k).sort((a, b) => b[1] - a[1])[0];
   const take = $('take'); take.replaceChildren();
   if (!n) take.textContent = 'No sightings yet. Tick a species on any checklist and it shows up here.';
-  else take.append(el('b', null, String(n)), ' sightings of ', el('b', null, String(species)), ' species so far. Top spotter: ', el('b', null, top && top[1] ? top[0] : 'nobody yet'), '.');
+  else take.append(el('b', null, String(n)), ' sightings of ', el('b', null, String(species)), ' species so far. Top spotter: ', el('b', null, top ? top[0] : 'nobody yet'), '.');
 
-  // feed
-  const feed = $('feed'); feed.replaceChildren(); $('feed-empty').replaceChildren();
-  [...log].sort((a, b) => when(b) - when(a)).slice(0, 12).forEach((r) => {
-    const tr = feed.insertRow();
-    const s = tr.insertCell(); s.className = 'sp'; s.textContent = r.species;
-    if (r.rarity) { s.appendChild(document.createElement('br')); s.appendChild(el('span', 'pill', r.rarity)); }
-    tr.insertCell().textContent = r.who || '-';
-    const p = tr.insertCell(); p.className = 'wide'; p.textContent = r.park;
-    tr.insertCell().textContent = `${r.date} ${r.time}`.trim();
-  });
-  if (!n) $('feed-empty').appendChild(el('div', 'empty', 'Nothing ticked yet.'));
+  bigFive(log, summary); journal(log); rare(log); spotters(log);
 
-  bars($('people'), NAMES.map((x) => ({ label: x, value: by[x] || 0, text: String(by[x] || 0) })).sort((a, b) => b.value - a.value), 'var(--ochre)');
-
-  const parks = {}; log.forEach((r) => { parks[r.park] = (parks[r.park] || 0) + 1; });
-  bars($('parks'), ['Kruger', 'Pilanesberg'].map((p) => ({ label: p, value: parks[p] || 0, text: String(parks[p] || 0) })), 'var(--bush2)');
-
-  // per day
   const pd = $('perday'); pd.replaceChildren();
   const days = new Map(); log.forEach((r) => days.set(r.date, (days.get(r.date) || 0) + 1));
   const dl = [...days].sort((a, b) => when({ date: a[0] }) - when({ date: b[0] }));
   if (!dl.length) pd.appendChild(el('div', 'empty', 'Bars appear once sightings are ticked.'));
-  else {
-    const max = Math.max(...dl.map((d) => d[1]));
-    const cols = el('div', 'cols'); const lab = el('div', 'days');
-    dl.forEach(([d, c]) => { const col = el('div', 'col'); col.style.height = `${(c / max) * 100}%`; col.title = `${d}: ${c}`; col.appendChild(el('span', null, String(c))); cols.appendChild(col); lab.appendChild(el('span', null, d)); });
-    pd.append(cols, lab);
-  }
+  else { const max = Math.max(...dl.map((d) => d[1])); const cols = el('div', 'cols'); const lab = el('div', 'days'); dl.forEach(([d, c]) => { const col = el('div', 'col'); col.style.height = `${(c / max) * 100}%`; col.title = `${d}: ${c}`; col.appendChild(el('span', null, String(c))); cols.appendChild(col); lab.appendChild(el('span', null, d)); }); pd.append(cols, lab); }
 
-  // summary: checklists + big five
-  const hi = summary.findIndex((r) => r[0] === 'Checklist');
-  const lists = [];
-  for (let i = hi + 1; hi >= 0 && i < summary.length && summary[i][0]; i++) {
-    const [name, seen, total, pct] = summary[i];
-    lists.push({ name, seen: +seen, total: +total, pct: parseFloat(pct) / 100 || 0 });
-  }
-  const all = lists.find((l) => l.name === 'All checklists');
-  $('t-pct').textContent = all ? `${Math.round(all.pct * 100)}%` : '-';
+  const hi = summary.findIndex((r) => r[0] === 'Checklist'); const lists = [];
+  for (let i = hi + 1; hi >= 0 && i < summary.length && summary[i][0]; i++) { const [name, seen, total] = summary[i]; lists.push({ name, seen: +seen, total: +total }); }
   bars($('lists'), lists.filter((l) => l.name !== 'All checklists').map((l) => ({ label: l.name.replace('Pilanesberg', 'Pilanes.'), value: l.seen, max: l.total || 1, text: `${l.seen}/${l.total}` })), 'var(--bush2)');
-
-  const bi = summary.findIndex((r) => (r[0] || '').startsWith('Big Five ('));
-  const b5 = $('big5'); b5.replaceChildren(); let seen5 = 0;
-  for (let i = bi + 1; bi >= 0 && i <= bi + 5 && i < summary.length; i++) {
-    const [animal, status] = summary[i]; const on = status === 'Seen'; if (on) seen5++;
-    const d = el('div', on ? 'on' : ''); d.append(el('i', null, on ? '★' : '☆'), animal); b5.appendChild(d);
-  }
-  $('t-b5').textContent = seen5;
   $('foot').textContent = `Updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. Refreshes by itself every few minutes.`;
 }
 
+let lastKey = '';
 async function load() {
   try {
     const [logRows, summary] = await Promise.all([getCSV(LOG_CSV), getCSV(SUMMARY_CSV)]);
-    const log = logRows.slice(1).filter((r) => r[4]).map((r) => ({ date: r[0], time: r[1], who: r[2], park: r[3], species: r[4], rarity: r[9] }));
-    render(log, summary);
+    const log = logRows.slice(1).filter((r) => r[4]).map((r) => ({ date: r[0], time: r[1], who: r[2], park: r[3], species: r[4], group: r[8], rarity: r[9] }));
+    const key = JSON.stringify([log, summary]);
+    if (key !== lastKey) { lastKey = key; render(log, summary); }
+    else $('foot').textContent = `Checked ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. Refreshes by itself every few minutes.`;
   } catch (e) {
     $('foot').replaceChildren(el('span', 'err', 'Could not reach the sheet just now. Check your signal; it will try again shortly.'));
   }
 }
-load();
-setInterval(load, 5 * 60 * 1000);
+sky(); setInterval(sky, 10 * 60 * 1000);
+load(); setInterval(load, 5 * 60 * 1000);
 </script>
 </body>
 </html>
