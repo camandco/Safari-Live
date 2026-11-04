@@ -182,7 +182,7 @@ $('cNo').onclick = closeConfirm;
 
 /* ---------- sync ---------- */
 let syncing = false; let syncMsg = '';
-const VERSION = 'v10';
+const VERSION = 'v11';
 async function sync(manual) {
   updateNet();
   if (!navigator.onLine) { if (manual) toast('No signal right now. Your ticks are safe on this phone.'); return; }
@@ -203,6 +203,8 @@ async function sync(manual) {
       const done = new Set(data.results.filter((r) => ['saved', 'already', 'not_found', 'bad_tab', 'bad_name'].includes(r.status)).map((r) => r.id));
       queue = queue.filter((i) => !done.has(i.id)); persist();
       const n = data.results.filter((r) => r.status === 'saved').length;
+      const dup = data.results.filter((r) => r.status === 'already').map((r) => (batch.find((i) => i.id === r.id) || {}).species).filter(Boolean);
+      if (dup.length) setTimeout(() => toast(`${dup.join(', ')} ${dup.length === 1 ? 'was' : 'were'} already ticked by someone else, so the first sighting was kept.`), n ? 3500 : 0);
       if (n) toast(`${n} sighting${n === 1 ? '' : 's'} synced to the group.`);
       if (queue.length) setTimeout(sync, 1500);
     }
