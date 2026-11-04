@@ -43,8 +43,8 @@ header{position:sticky;top:var(--navh,0px);z-index:10;background:linear-gradient
 .btn.done{background:var(--sand2);color:var(--muted)}
 .sp.is-seen{opacity:.75}
 .empty{color:var(--muted);text-align:center;padding:30px 10px}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translate(-50%,150%);transition:transform .35s;z-index:30;background:#3E2723;color:#FFF8EC;border-radius:14px;padding:12px 14px;display:flex;gap:12px;align-items:center;width:min(94vw,460px);box-shadow:0 10px 30px rgba(0,0,0,.3);font-size:14px}
-.toast.show{transform:translate(-50%,0)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translate(-50%,calc(100% + 60px));opacity:0;visibility:hidden;transition:transform .35s,opacity .35s,visibility 0s .35s;z-index:30;background:#3E2723;color:#FFF8EC;border-radius:14px;padding:12px 14px;display:flex;gap:12px;align-items:center;width:min(94vw,460px);box-shadow:0 10px 30px rgba(0,0,0,.3);font-size:14px}
+.toast.show{transform:translate(-50%,0);opacity:1;visibility:visible;transition:transform .35s,opacity .35s,visibility 0s}
 .toast button{margin-left:auto;border:0;background:#FFF8EC;color:#3E2723;font-weight:700;border-radius:10px;padding:7px 12px}
 .sheet{position:fixed;inset:0;z-index:40;background:rgba(30,20,10,.55);display:flex;align-items:flex-end;justify-content:center}
 .sheet[hidden]{display:none}
@@ -182,7 +182,7 @@ $('cNo').onclick = closeConfirm;
 
 /* ---------- sync ---------- */
 let syncing = false; let syncMsg = '';
-const VERSION = 'v9';
+const VERSION = 'v10';
 async function sync(manual) {
   updateNet();
   if (!navigator.onLine) { if (manual) toast('No signal right now. Your ticks are safe on this phone.'); return; }
