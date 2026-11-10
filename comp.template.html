@@ -75,12 +75,17 @@ td.r{text-align:right;font-variant-numeric:tabular-nums}
 .locked{text-align:center;padding:40px 20px}
 .locked .g{font-size:48px}
 [hidden]{display:none!important}
+.brief{border-radius:12px;background:var(--sand);border:1px solid var(--line);padding:10px 12px;margin-bottom:8px}
+.brief.sel{border-color:var(--ochre);margin-bottom:12px}
+.brief .bt{font-weight:700;color:var(--dusk)}
+.brief .bb{font-size:14px;margin-top:2px}
+.brief .tp{font-size:13px;color:var(--muted);margin-top:4px;font-style:italic}
 </style>
 </head>
 <body data-page="comp">
 <header class="hero">
   <h1>Photo comp</h1>
-  <p>Cam, Melissa, Keegan, Mark and Tracy. Seven categories, one Photographer of the Trip.</p>
+  <p>Cam, Melissa, Keegan, Mark and Tracy. Nine shot briefs, one Photographer of the Trip.</p>
 </header>
 
 <div id="locked" class="wrap" hidden><div class="card locked"><div class="g">📸</div><h2>Not on the list</h2><p class="note">The photo comp is just for Cam, Melissa, Keegan, Mark and Tracy.</p></div></div>
@@ -95,13 +100,14 @@ td.r{text-align:right;font-variant-numeric:tabular-nums}
         <h2>Enter a photo</h2>
         <p class="note">Up to 2 per category. Editing is fine (crop, colour, black and white), but no adding or removing things and no AI. Uploading needs signal.</p>
         <div class="chips" id="catPick"></div>
+        <div class="brief sel" id="selBrief"></div>
         <input class="in" id="title" maxlength="60" placeholder="Give it a title (optional)">
         <label class="pick" id="pick"><span>📷</span><span id="pickT">Choose a photo</span><input type="file" id="file" accept="image/*"><img id="preview" hidden alt=""></label>
         <button class="btn" id="submit" disabled>Submit entry</button>
         <p class="msg" id="enterMsg"></p>
       </div>
       <div class="card"><h2>Your entries</h2><div id="mine"></div></div>
-      <div class="card"><h2>Categories</h2><div id="catInfo"></div></div>
+      <div class="card"><h2>The briefs</h2><p class="note">What to shoot for in each category.</p><div id="catInfo"></div></div>
     </section>
 
     <section id="tab-vote" hidden>
@@ -122,19 +128,57 @@ td.r{text-align:right;font-variant-numeric:tabular-nums}
 const SCRIPT_URL = '__SCRIPT_URL__';
 const ORIGINALS = ['Cam', 'Melissa', 'Keegan', 'Mark', 'Tracy'];
 const CAT_INFO = {
-  'Big Five': 'Lion, leopard, elephant, buffalo or rhino.',
-  Feathers: 'Any bird, perched or flying.',
-  Action: 'Movement: running, fighting, hunting, take-off, splashing.',
-  'Close Encounter': 'A close portrait of one animal. Eye contact wins.',
-  'Golden Hour': 'Sunrise, sunset or landscape. Animals optional.',
-  'Funniest Moment': 'Animals or people. Anything that made us laugh.',
-  'Phone Only': 'Shot on a phone, no big lenses.',
+ "Eye Contact": {
+  "icon": "👁️",
+  "brief": "An animal looking straight into your lens.",
+  "tip": "Sharp eyes are everything. Get low and wait for the head to turn."
+ },
+ "Bird in Flight": {
+  "icon": "🦅",
+  "brief": "Any bird in the air with its wings open.",
+  "tip": "Fast shutter, follow the bird and shoot a burst. Raptors and bee-eaters are great targets."
+ },
+ "Big Five Portrait": {
+  "icon": "🦁",
+  "brief": "Lion, leopard, elephant, buffalo or rhino, filling the frame.",
+  "tip": "Zoom in so it's about the animal, not the bush. Faces and texture win."
+ },
+ "Little Ones": {
+  "icon": "🐣",
+  "brief": "A baby or young animal, ideally with mom in the shot.",
+  "tip": "Look for impala lambs, elephant calves and warthog piglets running behind mom."
+ },
+ "Water's Edge": {
+  "icon": "💧",
+  "brief": "Animals drinking, bathing, crossing or reflected in water.",
+  "tip": "Dams and river crossings at midday. A still reflection is gold."
+ },
+ "Silhouette": {
+  "icon": "🌅",
+  "brief": "A dark shape against a sunrise or sunset sky: an animal, a tree or the vehicle.",
+  "tip": "Expose for the sky, not the subject. Giraffes and acacias are made for this."
+ },
+ "Action!": {
+  "icon": "⚡",
+  "brief": "Something happening: running, fighting, hunting, playing, yawning or dust bathing.",
+  "tip": "Shoot bursts and be patient. A big yawn counts."
+ },
+ "The Funny One": {
+  "icon": "😂",
+  "brief": "Anything that made the group laugh, animals or people.",
+  "tip": "Baboons, warthogs and sleepy passengers are fair game."
+ },
+ "Phone Only": {
+  "icon": "📱",
+  "brief": "Any subject, but it must be shot on a phone.",
+  "tip": "Evens the field against the big lenses. Use wide angle for scenery."
+ }
 };
 const $ = (id) => document.getElementById(id);
 const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
 const ls = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } };
 const img = (id, w = 1200) => `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w${w}`;
-let justEntered = false; let state = null; let tab = 'enter'; let cat = 'Big Five'; let photo = null;
+let justEntered = false; let state = null; let tab = 'enter'; let cat = 'Eye Contact'; let photo = null;
 
 const me = () => ls('me', ''); const code = () => ls('code', '');
 async function api(body) {
@@ -171,6 +215,7 @@ function render() {
   // category chips
   const cp = $('catPick'); cp.replaceChildren();
   state.categories.forEach((c) => { const n = mine.filter((e) => e.category === c).length; const b = el('button', c === cat ? 'on' : '', `${c} ${n}/${state.max}`); b.disabled = n >= state.max && c !== cat; b.onclick = () => { cat = c; render(); }; cp.appendChild(b); });
+  { const k = CAT_INFO[cat] || {}; const sb = $('selBrief'); sb.replaceChildren(el('div', 'bt', `${k.icon || '📷'} ${cat}`), el('div', 'bb', k.brief || ''), el('div', 'tp', k.tip ? 'Tip: ' + k.tip : '')); }
   if (!justEntered && mine.filter((e) => e.category === cat).length >= state.max) $('enterMsg').textContent = `You've used both ${cat} entries.`;
   justEntered = false;
   $('submit').disabled = !photo || mine.filter((e) => e.category === cat).length >= state.max;
@@ -179,7 +224,7 @@ function render() {
   if (!mine.length) box.appendChild(el('div', 'empty', 'Nothing entered yet.'));
   else { const g = el('div', 'grid'); mine.forEach((e) => g.appendChild(photoCard(e, true))); box.appendChild(g); }
   const ci = $('catInfo'); ci.replaceChildren();
-  state.categories.forEach((c) => { const p = el('p', 'note'); p.append(el('b', null, c + ': '), CAT_INFO[c] || ''); ci.appendChild(p); });
+  state.categories.forEach((c) => { const k = CAT_INFO[c] || {}; const d = el('div', 'brief'); d.append(el('div', 'bt', `${k.icon || '📷'} ${c}`), el('div', 'bb', k.brief || ''), el('div', 'tp', k.tip ? 'Tip: ' + k.tip : '')); ci.appendChild(d); });
   renderVote(); renderResults();
 }
 function photoCard(e, manage) {
@@ -194,7 +239,7 @@ function renderVote() {
   const box = $('voteList'); box.replaceChildren();
   state.categories.forEach((c) => {
     const list = state.entries.filter((e) => e.category === c);
-    const card = el('div', 'card'); const h = el('h3', null, c); h.appendChild(el('small', null, `${list.length} entr${list.length === 1 ? 'y' : 'ies'}`)); card.appendChild(h);
+    const card = el('div', 'card'); const h = el('h3', null, `${(CAT_INFO[c] || {}).icon || ''} ${c}`); h.appendChild(el('small', null, `${list.length} entr${list.length === 1 ? 'y' : 'ies'}`)); card.append(h, el('p', 'note', (CAT_INFO[c] || {}).brief || ''));
     if (!list.length) card.appendChild(el('div', 'empty', 'No entries yet.'));
     else {
       const g = el('div', 'grid');
@@ -226,7 +271,7 @@ function renderResults() {
   state.categories.forEach((c) => {
     const ranked = state.entries.filter((e) => e.category === c && e.score != null).sort((a, b) => b.score - a.score).slice(0, 3);
     ranked.forEach((e, i) => { if (pts[e.who]) { pts[e.who].pts += 3 - i; if (i === 0) pts[e.who].gold++; } });
-    const card = el('div', 'card'); card.appendChild(el('h3', null, c));
+    const card = el('div', 'card'); card.appendChild(el('h3', null, `${(CAT_INFO[c] || {}).icon || ''} ${c}`));
     if (!ranked.length) card.appendChild(el('div', 'empty', 'No scored entries.'));
     else { const pod = el('div', 'pod'); ranked.forEach((e, i) => { const p = el('div', 'p p' + (i + 1)); const im = el('img'); im.src = img(e.fileId, 600); im.onclick = () => zoom(e.fileId); p.append(el('div', 'm', ['🥇', '🥈', '🥉'][i]), im, el('div', 'who', e.who), el('div', 'sc', `${e.score} avg${e.title ? ' · ' + e.title : ''}`)); pod.appendChild(p); }); card.appendChild(pod); }
     cats.appendChild(card);
