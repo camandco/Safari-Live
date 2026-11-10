@@ -265,7 +265,7 @@ const LOG_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTotl03LZgv5wXl
 const SUMMARY_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTotl03LZgv5wXlVOdvTyVfAuV8-SBGbSiKh4qgMMcCRGJbKgHIKiyuXwOh6kTGwUXQ2FarxInyJath/pub?gid=900001&single=true&output=csv';
 const pl = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 const an = (w) => (/^[aeiou]/i.test(w) ? 'an ' : 'a ') + w;
-const NAMES = ['Cam', 'Melissa', 'Keegan', 'Mark', 'Tracy'];
+const NAMES = ['Cam', 'Melissa', 'Keegan', 'Mark', 'Tracy', 'Karen', 'Mac', 'Leigh', 'Daniel', 'Troy'];
 const RARE = ['Occasional', 'Rare', 'Very Rare', 'Not typically present'];
 const params = new URLSearchParams(location.search);
 
@@ -441,7 +441,7 @@ function drawMap(log) {
   }
   layer.clearLayers();
   const pts = log.filter((r) => r.lat != null);
-  const col = { Cam: '#C8742B', Melissa: '#4E6B3A', Keegan: '#8C3B1E', Mark: '#2F6E8C', Tracy: '#9C4F9C' };
+  const col = { Cam: '#C8742B', Melissa: '#4E6B3A', Keegan: '#8C3B1E', Mark: '#2F6E8C', Tracy: '#9C4F9C', Karen: '#D4566B', Mac: '#3A8F7E', Leigh: '#B58B1E', Daniel: '#5C6BC0', Troy: '#7A4E2D' };
   pts.forEach((r) => {
     const rare = RARE.includes(r.rarity);
     const m = L.circleMarker([r.lat, r.lng], { radius: rare ? 10 : 7, color: '#3E2723', weight: 2, fillColor: rare ? '#E8B53C' : (col[r.who] || '#C8742B'), fillOpacity: .95 });
