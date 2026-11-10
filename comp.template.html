@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Photo comp · Safari Live</title>
+<meta name="theme-color" content="#8C3B1E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=DM+Serif+Display&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--sand:#F4EBD9;--sand2:#EADBC0;--khaki:#C9B38A;--bush:#2F4F2F;--bush2:#4E6B3A;--ochre:#C8742B;--dusk:#8C3B1E;--ink:#3E2723;--muted:#7A6450;--panel:#FFFBF3;--line:#E2D3B5;--gold:#E8B53C;--bad:#B3261E}
+@media (prefers-color-scheme:dark){:root{--sand:#1F1A14;--sand2:#2A231B;--khaki:#6E5C40;--bush:#9CC088;--bush2:#7FA266;--ochre:#E39A55;--ink:#F2E7D5;--muted:#BCA88C;--panel:#2A231B;--line:#3D3326}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--sand);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:16px;line-height:1.45;padding-bottom:calc(40px + env(safe-area-inset-bottom))}
+.hero{background:linear-gradient(135deg,#6A1B9A 0%,#8C3B1E 55%,#E0892F 100%);color:#FFF8EC;padding:18px 16px 16px}
+.hero h1{font-family:"DM Serif Display",Georgia,serif;font-weight:400;font-size:32px;margin:0}
+.hero p{margin:4px 0 0;font-size:14px;color:#FFE9CC}
+.seg{position:sticky;top:var(--navh,0px);z-index:20;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:8px 12px;background:var(--sand);border-bottom:1px solid var(--line)}
+.seg button{border:0;border-radius:10px;padding:10px;font-size:15px;font-weight:700;background:var(--panel);color:var(--muted);border:1px solid var(--line)}
+.seg button.on{background:var(--ochre);border-color:var(--ochre);color:#fff}
+.wrap{max-width:900px;margin:0 auto;padding:14px 12px;display:flex;flex-direction:column;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+h2{font-family:"DM Serif Display",Georgia,serif;font-weight:400;font-size:24px;margin:0 0 4px;color:var(--bush)}
+h3{margin:0 0 8px;font-size:16px;color:var(--dusk);display:flex;align-items:center;gap:8px}
+h3 small{font-weight:500;color:var(--muted);font-size:12px}
+.note{font-size:13px;color:var(--muted);margin:0 0 12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.chips button{border:1px solid var(--line);background:var(--sand);color:var(--ink);border-radius:20px;padding:8px 12px;font-size:14px;font-weight:600}
+.chips button.on{background:var(--bush2);border-color:var(--bush2);color:#fff}
+.chips button:disabled{opacity:.45}
+.in{width:100%;font-size:16px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--sand);color:var(--ink);margin-bottom:10px}
+.pick{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;border:2px dashed var(--khaki);border-radius:14px;min-height:170px;background:var(--sand);color:var(--muted);font-weight:600;cursor:pointer;overflow:hidden;position:relative;margin-bottom:10px}
+.pick img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#111}
+.pick input{display:none}
+.btn{border:0;border-radius:12px;padding:13px 16px;font-size:16px;font-weight:700;background:var(--ochre);color:#fff;width:100%;cursor:pointer}
+.btn:disabled{opacity:.5}
+.btn.alt{background:var(--sand2);color:var(--ink)}
+.msg{font-size:14px;margin:8px 0 0;min-height:1.2em}
+.msg.err{color:var(--bad)}
+.msg:empty{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:12px}
+.photo{border-radius:12px;overflow:hidden;background:var(--sand);border:1px solid var(--line)}
+.photo .img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#2A231B;cursor:zoom-in}
+.photo .b{padding:10px 12px}
+.photo .t{font-family:Caveat,cursive;font-size:24px;font-weight:700;line-height:1.1}
+.photo .w{font-size:12px;color:var(--muted)}
+.scores{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin-top:8px}
+.scores button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:7px;padding:8px 0;font-size:14px;font-weight:700;cursor:pointer}
+.scores button.on{background:var(--gold);border-color:var(--gold);color:#3E2723}
+.own{margin-top:8px;font-size:13px;font-weight:600;color:var(--ochre)}
+.del{margin-top:8px;border:0;background:none;color:var(--bad);font-weight:600;font-size:13px;padding:0;cursor:pointer}
+.empty{color:var(--muted);font-style:italic;font-size:14px;padding:4px 0}
+.prog{display:grid;grid-template-columns:6rem 1fr 3.5rem;gap:10px;align-items:center;font-size:14px;margin:6px 0}
+.track{height:12px;background:var(--sand2);border-radius:6px;overflow:hidden}.fill{height:100%;background:var(--bush2);border-radius:6px}
+.prog .n{text-align:right;color:var(--muted);font-size:12px}
+.pod{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-items:end}
+.pod .p{text-align:center}
+.pod img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;cursor:zoom-in;border:3px solid transparent}
+.pod .p1 img{border-color:#E8B53C}.pod .p2 img{border-color:#B8B8B8}.pod .p3 img{border-color:#C98A55}
+.pod .m{font-size:20px}.pod .who{font-family:Caveat,cursive;font-size:22px;font-weight:700;line-height:1}.pod .sc{font-size:12px;color:var(--muted)}
+.pod .p1{order:2}.pod .p2{order:1}.pod .p3{order:3}
+.winner{text-align:center;background:linear-gradient(135deg,#F7D774,#C98E1E);color:#3E2723;border-radius:14px;padding:18px}
+.winner .k{font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
+.winner .n{font-family:"DM Serif Display",Georgia,serif;font-size:36px;line-height:1.1}
+table{width:100%;border-collapse:collapse;font-size:15px}
+td,th{padding:8px 6px;border-bottom:1px dashed var(--line);text-align:left}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+td.r{text-align:right;font-variant-numeric:tabular-nums}
+.lb{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;padding:16px}
+.lb[hidden]{display:none}
+.lb img{max-width:100%;max-height:100%;object-fit:contain}
+.lb button{position:absolute;top:calc(14px + env(safe-area-inset-top));right:14px;border:0;background:rgba(255,255,255,.2);color:#fff;width:40px;height:40px;border-radius:50%;font-size:22px}
+.locked{text-align:center;padding:40px 20px}
+.locked .g{font-size:48px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body data-page="comp">
+<header class="hero">
+  <h1>Photo comp</h1>
+  <p>Cam, Melissa, Keegan, Mark and Tracy. Seven categories, one Photographer of the Trip.</p>
+</header>
+
+<div id="locked" class="wrap" hidden><div class="card locked"><div class="g">📸</div><h2>Not on the list</h2><p class="note">The photo comp is just for Cam, Melissa, Keegan, Mark and Tracy.</p></div></div>
+
+<div id="app" hidden>
+  <nav class="seg"><button data-tab="enter" class="on">Enter</button><button data-tab="vote">Vote</button><button data-tab="results">Results</button></nav>
+  <div class="wrap">
+    <p class="msg err" id="status"></p>
+
+    <section id="tab-enter">
+      <div class="card">
+        <h2>Enter a photo</h2>
+        <p class="note">Up to 2 per category. Editing is fine (crop, colour, black and white), but no adding or removing things and no AI. Uploading needs signal.</p>
+        <div class="chips" id="catPick"></div>
+        <input class="in" id="title" maxlength="60" placeholder="Give it a title (optional)">
+        <label class="pick" id="pick"><span>📷</span><span id="pickT">Choose a photo</span><input type="file" id="file" accept="image/*"><img id="preview" hidden alt=""></label>
+        <button class="btn" id="submit" disabled>Submit entry</button>
+        <p class="msg" id="enterMsg"></p>
+      </div>
+      <div class="card"><h2>Your entries</h2><div id="mine"></div></div>
+      <div class="card"><h2>Categories</h2><div id="catInfo"></div></div>
+    </section>
+
+    <section id="tab-vote" hidden>
+      <p class="note">Score every photo from 1 to 10. Photographers stay anonymous until the results are revealed. You can change a score any time. Tap a photo to see it full size.</p>
+      <div id="voteList"></div>
+    </section>
+
+    <section id="tab-results" hidden>
+      <div id="results"></div>
+    </section>
+  </div>
+</div>
+
+<div class="lb" id="lb" hidden><img id="lbImg" alt=""><button id="lbX" aria-label="Close">×</button></div>
+
+<script src="common.js"></script>
+<script>
+const SCRIPT_URL = '__SCRIPT_URL__';
+const ORIGINALS = ['Cam', 'Melissa', 'Keegan', 'Mark', 'Tracy'];
+const CAT_INFO = {
+  'Big Five': 'Lion, leopard, elephant, buffalo or rhino.',
+  Feathers: 'Any bird, perched or flying.',
+  Action: 'Movement: running, fighting, hunting, take-off, splashing.',
+  'Close Encounter': 'A close portrait of one animal. Eye contact wins.',
+  'Golden Hour': 'Sunrise, sunset or landscape. Animals optional.',
+  'Funniest Moment': 'Animals or people. Anything that made us laugh.',
+  'Phone Only': 'Shot on a phone, no big lenses.',
+};
+const $ = (id) => document.getElementById(id);
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const ls = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } };
+const img = (id, w = 1200) => `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w${w}`;
+let justEntered = false; let state = null; let tab = 'enter'; let cat = 'Big Five'; let photo = null;
+
+const me = () => ls('me', ''); const code = () => ls('code', '');
+async function api(body) {
+  const res = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ code: code(), who: me() }, body)) });
+  return res.json();
+}
+async function load() {
+  $('status').textContent = '';
+  if (!navigator.onLine) { $('status').textContent = 'No signal. The photo comp needs signal to load.'; return; }
+  try {
+    const r = await fetch(`${SCRIPT_URL}?action=comp&code=${encodeURIComponent(code())}&me=${encodeURIComponent(me())}&t=${Date.now()}`);
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error === 'bad_code' ? 'Password is out of date. Log out and back in.' : d.error);
+    state = d; render();
+  } catch (e) { $('status').textContent = 'Could not load the photo comp: ' + e.message; }
+}
+const ERR = { limit: 'You already have 2 entries in that category. Delete one first.', own_photo: "You can't score your own photo.", not_in_comp: 'Only the original five can enter.', bad_image: 'That photo could not be read. Try another.', admin_only: 'Only Cam can do that.' };
+
+/* ---------- gate ---------- */
+function gate() {
+  const ok = ORIGINALS.includes(me());
+  $('locked').hidden = ok || !me(); $('app').hidden = !ok;
+  if (ok) load();
+}
+addEventListener('safari-login', gate);
+
+/* ---------- tabs ---------- */
+document.querySelectorAll('.seg button').forEach((b) => b.onclick = () => { tab = b.dataset.tab; document.querySelectorAll('.seg button').forEach((x) => x.classList.toggle('on', x === b)); ['enter', 'vote', 'results'].forEach((t) => { $('tab-' + t).hidden = t !== tab; }); scrollTo(0, 0); load(); });
+
+/* ---------- render ---------- */
+function render() {
+  if (!state) return;
+  const mine = state.entries.filter((e) => e.mine);
+  // category chips
+  const cp = $('catPick'); cp.replaceChildren();
+  state.categories.forEach((c) => { const n = mine.filter((e) => e.category === c).length; const b = el('button', c === cat ? 'on' : '', `${c} ${n}/${state.max}`); b.disabled = n >= state.max && c !== cat; b.onclick = () => { cat = c; render(); }; cp.appendChild(b); });
+  if (!justEntered && mine.filter((e) => e.category === cat).length >= state.max) $('enterMsg').textContent = `You've used both ${cat} entries.`;
+  justEntered = false;
+  $('submit').disabled = !photo || mine.filter((e) => e.category === cat).length >= state.max;
+  // my entries
+  const box = $('mine'); box.replaceChildren();
+  if (!mine.length) box.appendChild(el('div', 'empty', 'Nothing entered yet.'));
+  else { const g = el('div', 'grid'); mine.forEach((e) => g.appendChild(photoCard(e, true))); box.appendChild(g); }
+  const ci = $('catInfo'); ci.replaceChildren();
+  state.categories.forEach((c) => { const p = el('p', 'note'); p.append(el('b', null, c + ': '), CAT_INFO[c] || ''); ci.appendChild(p); });
+  renderVote(); renderResults();
+}
+function photoCard(e, manage) {
+  const c = el('div', 'photo');
+  const im = el('img', 'img'); im.loading = 'lazy'; im.src = img(e.fileId, 800); im.alt = e.title || e.category; im.onclick = () => zoom(e.fileId); c.appendChild(im);
+  const b = el('div', 'b'); b.appendChild(el('div', 't', e.title || 'Untitled'));
+  b.appendChild(el('div', 'w', manage ? `${e.category} · ${e.votes} vote${e.votes === 1 ? '' : 's'}` : (e.who ? `by ${e.who}` : `${e.votes} vote${e.votes === 1 ? '' : 's'} so far`)));
+  if (manage) { const d = el('button', 'del', 'Delete entry'); d.onclick = async () => { if (!confirm('Delete this entry? Its votes go too.')) return; const r = await api({ action: 'delete', entryId: e.id }); if (!r.ok) $('status').textContent = ERR[r.error] || r.error; load(); }; b.appendChild(d); }
+  c.appendChild(b); return c;
+}
+function renderVote() {
+  const box = $('voteList'); box.replaceChildren();
+  state.categories.forEach((c) => {
+    const list = state.entries.filter((e) => e.category === c);
+    const card = el('div', 'card'); const h = el('h3', null, c); h.appendChild(el('small', null, `${list.length} entr${list.length === 1 ? 'y' : 'ies'}`)); card.appendChild(h);
+    if (!list.length) card.appendChild(el('div', 'empty', 'No entries yet.'));
+    else {
+      const g = el('div', 'grid');
+      list.forEach((e) => {
+        const pc = photoCard(e, false); const b = pc.querySelector('.b');
+        if (e.mine) b.appendChild(el('div', 'own', 'Your photo, so no vote from you'));
+        else {
+          const row = el('div', 'scores');
+          for (let s = 1; s <= 10; s++) { const btn = el('button', state.myVotes[e.id] === s ? 'on' : '', String(s)); btn.onclick = async () => { row.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === btn)); state.myVotes[e.id] = s; const r = await api({ action: 'vote', entryId: e.id, score: s }).catch(() => ({ ok: false, error: 'No signal, vote not saved' })); if (!r.ok) { $('status').textContent = ERR[r.error] || r.error; btn.classList.remove('on'); } }; row.appendChild(btn); }
+          b.appendChild(row);
+        }
+        g.appendChild(pc);
+      });
+      card.appendChild(g);
+    }
+    box.appendChild(card);
+  });
+  box.appendChild(el('div', 'card'));
+  box.lastChild.append(el('h3', null, 'Your progress'), el('p', 'note', `You've scored ${Object.keys(state.myVotes).length} of ${state.entries.filter((e) => !e.mine).length} photos.`));
+}
+function renderResults() {
+  const box = $('results'); box.replaceChildren();
+  const prog = el('div', 'card'); prog.append(el('h2', null, 'Voting progress'), el('p', 'note', 'Photos scored by each person.'));
+  state.people.forEach((p) => { const n = state.voted[p] || 0; const of = (state.votable || {})[p] || 0; const r = el('div', 'prog'); const t = el('div', 'track'); const f = el('div', 'fill'); f.style.width = `${of ? Math.min(100, (n / of) * 100) : 0}%`; t.appendChild(f); r.append(el('div', null, p), t, el('div', 'n', `${n} of ${of}`)); prog.appendChild(r); });
+  if (state.admin) { const b = el('button', 'btn' + (state.revealed ? ' alt' : ''), state.revealed ? 'Hide results again' : 'Reveal the results 🎉'); b.style.marginTop = '12px'; b.onclick = async () => { const r = await api({ action: 'reveal', value: !state.revealed }); if (!r.ok) $('status').textContent = ERR[r.error] || r.error; load(); }; prog.appendChild(b); }
+  if (!state.revealed) { box.appendChild(el('div', 'card')); box.lastChild.append(el('h2', null, 'Results are hidden'), el('p', 'note', state.admin ? 'Reveal them when everyone has voted.' : 'Cam will reveal them once everyone has voted.')); box.appendChild(prog); return; }
+  const pts = Object.fromEntries(state.people.map((p) => [p, { p, pts: 0, gold: 0 }]));
+  const cats = el('div');
+  state.categories.forEach((c) => {
+    const ranked = state.entries.filter((e) => e.category === c && e.score != null).sort((a, b) => b.score - a.score).slice(0, 3);
+    ranked.forEach((e, i) => { if (pts[e.who]) { pts[e.who].pts += 3 - i; if (i === 0) pts[e.who].gold++; } });
+    const card = el('div', 'card'); card.appendChild(el('h3', null, c));
+    if (!ranked.length) card.appendChild(el('div', 'empty', 'No scored entries.'));
+    else { const pod = el('div', 'pod'); ranked.forEach((e, i) => { const p = el('div', 'p p' + (i + 1)); const im = el('img'); im.src = img(e.fileId, 600); im.onclick = () => zoom(e.fileId); p.append(el('div', 'm', ['🥇', '🥈', '🥉'][i]), im, el('div', 'who', e.who), el('div', 'sc', `${e.score} avg${e.title ? ' · ' + e.title : ''}`)); pod.appendChild(p); }); card.appendChild(pod); }
+    cats.appendChild(card);
+  });
+  const table = Object.values(pts).sort((a, b) => b.pts - a.pts || b.gold - a.gold);
+  const top = table[0] && table[0].pts ? table.filter((t) => t.pts === table[0].pts && t.gold === table[0].gold).map((t) => t.p).join(' & ') : 'Nobody yet';
+  const w = el('div', 'winner'); w.append(el('div', 'k', 'Photographer of the Trip'), el('div', 'n', top)); box.appendChild(w);
+  const tc = el('div', 'card'); tc.appendChild(el('h2', null, 'Points'));
+  const t = el('table'); const hr = t.insertRow(); ['Photographer', 'Points', 'Golds'].forEach((x) => hr.appendChild(el('th', null, x)));
+  table.forEach((r) => { const tr = t.insertRow(); tr.insertCell().textContent = r.p; const a = tr.insertCell(); a.className = 'r'; a.textContent = r.pts; const b = tr.insertCell(); b.className = 'r'; b.textContent = r.gold; });
+  tc.append(el('p', 'note', 'Gold 3, silver 2, bronze 1 in each category. Ties go to more golds.'), t); box.appendChild(tc);
+  box.appendChild(cats); box.appendChild(prog);
+}
+
+/* ---------- entering ---------- */
+$('file').onchange = async () => {
+  const f = $('file').files[0]; if (!f) return;
+  $('pickT').textContent = 'Preparing photo…'; $('enterMsg').textContent = '';
+  try {
+    const bmp = await new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => bad(new Error('read')); i.src = URL.createObjectURL(f); });
+    const max = 2000; const k = Math.min(1, max / Math.max(bmp.naturalWidth, bmp.naturalHeight));
+    const cv = document.createElement('canvas'); cv.width = Math.round(bmp.naturalWidth * k); cv.height = Math.round(bmp.naturalHeight * k);
+    cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
+    photo = cv.toDataURL('image/jpeg', 0.85);
+    $('preview').src = photo; $('preview').hidden = false; $('pickT').textContent = 'Tap to choose a different photo';
+  } catch (e) { photo = null; $('pickT').textContent = 'Could not read that photo. Try another.'; }
+  render();
+};
+$('submit').onclick = async () => {
+  if (!photo) return;
+  if (!navigator.onLine) { $('enterMsg').textContent = 'No signal right now. Try again when you have signal.'; return; }
+  $('submit').disabled = true; $('enterMsg').textContent = 'Uploading…';
+  try {
+    const r = await api({ action: 'photo', category: cat, title: $('title').value.trim(), image: photo });
+    if (!r.ok) throw new Error(ERR[r.error] || r.error);
+    $('enterMsg').textContent = `Entered in ${cat}! 🎉`; justEntered = true; photo = null; $('preview').hidden = true; $('file').value = ''; $('title').value = ''; $('pickT').textContent = 'Choose a photo';
+    load();
+  } catch (e) { $('enterMsg').textContent = 'Upload failed: ' + e.message; $('submit').disabled = false; }
+};
+
+/* ---------- lightbox ---------- */
+function zoom(id) { $('lbImg').src = img(id, 2000); $('lb').hidden = false; }
+$('lbX').onclick = () => { $('lb').hidden = true; $('lbImg').src = ''; };
+$('lb').onclick = (e) => { if (e.target === $('lb')) $('lbX').onclick(); };
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+gate();
+</script>
+</body>
+</html>

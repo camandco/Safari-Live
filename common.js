@@ -29,6 +29,7 @@
   .sx-links a.on{background:#F3E4C8;color:#8C3B1E}
   .sx-links a:hover,.sx-links button:hover{background:#F4EBD9}
   .sx-links i{font-style:normal;width:24px;text-align:center;font-size:18px}
+  .sx-links a[hidden]{display:none}
   .sx-sep{height:1px;background:#E2D3B5;margin:8px 12px}
   .sx-links button{font-weight:500;color:#7A6450}
   .sx-login{position:fixed;inset:0;z-index:100;background:linear-gradient(180deg,#F6C46B 0%,#E0892F 45%,#8C3B1E 100%);display:flex;align-items:center;justify-content:center;padding:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
@@ -48,7 +49,7 @@
   /* ---------- menu ---------- */
   const nav = el('nav', 'sx-nav');
   const burger = el('button', 'sx-burger'); burger.type = 'button'; burger.setAttribute('aria-label', 'Open menu'); burger.appendChild(el('span'));
-  const title = el('div', 'sx-title', page === 'tick' ? 'Log sightings' : 'Safari Live');
+  const title = el('div', 'sx-title', ({ tick: 'Log sightings', comp: 'Photo comp' })[page] || 'Safari Live');
   nav.append(burger, title);
   document.body.prepend(nav);
   const shade = el('div', 'sx-shade');
@@ -56,8 +57,11 @@
   const head = el('div', 'sx-dhead'); const who = el('div', 'u');
   head.append(el('div', 'g', '🦒'), el('div', 't', 'Safari Live'), who);
   const links = el('div', 'sx-links');
-  [['dashboard', './', '📊', 'Dashboard'], ['tick', 'tick.html', '✅', 'Log sightings'], ['help', 'help.html', '📖', 'How to use']].forEach(([id, href, ic, label]) => {
+  const ORIGINALS = ['Cam', 'Melissa', 'Keegan', 'Mark', 'Tracy'];
+  const compLinks = [];
+  [['dashboard', './', '📊', 'Dashboard'], ['tick', 'tick.html', '✅', 'Log sightings'], ['comp', 'comp.html', '📸', 'Photo comp'], ['help', 'help.html', '📖', 'How to use']].forEach(([id, href, ic, label]) => {
     const a = el('a', page === id ? 'on' : ''); a.href = href; a.append(el('i', null, ic), label); links.appendChild(a);
+    if (id === 'comp') compLinks.push(a);
   });
   links.appendChild(el('div', 'sx-sep'));
   const sw = el('button'); sw.type = 'button'; sw.append(el('i', null, '👤'), 'Switch person');
@@ -106,7 +110,7 @@
     card.appendChild(grid);
     box.hidden = false;
   }
-  function refresh() { const m = ls.get('me', ''); who.textContent = m ? `Signed in as ${m}` : 'Not signed in'; title.replaceChildren(page === 'tick' ? 'Log sightings' : 'Safari Live'); if (m) title.appendChild(el('small', null, m)); }
+  function refresh() { const m = ls.get('me', ''); compLinks.forEach((x) => { x.hidden = !ORIGINALS.includes(m); }); who.textContent = m ? `Signed in as ${m}` : 'Not signed in'; title.replaceChildren(({ tick: 'Log sightings', comp: 'Photo comp' })[page] || 'Safari Live'); if (m) title.appendChild(el('small', null, m)); }
 
   window.SafariAuth = { me: () => ls.get('me', ''), code: () => ls.get('code', ''), switchUser: showNames };
   refresh();
