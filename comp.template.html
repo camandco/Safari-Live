@@ -194,13 +194,16 @@ async function api(body) {
 }
 async function load() {
   $('status').textContent = '';
+  if (!state) render();
   if (!navigator.onLine) { $('status').textContent = 'No signal. The photo comp needs signal to load.'; return; }
   try {
     const r = await fetch(`${SCRIPT_URL}?action=comp&code=${encodeURIComponent(code())}&me=${encodeURIComponent(me())}&t=${Date.now()}`);
     const d = await r.json();
     if (!d.ok) throw new Error(d.error === 'bad_code' ? 'Password is out of date. Log out and back in.' : d.error);
+    if (!d.entries) throw new Error('the sync script has not been updated for the photo comp yet. Cam needs to paste in the latest script and deploy a new version');
     state = d; render();
-  } catch (e) { $('status').textContent = 'Could not load the photo comp: ' + e.message; }
+    if (d.categories && d.categories.join('|') !== Object.keys(CAT_INFO).join('|')) $('status').textContent = 'The sync script still has the old categories. Cam needs to paste in the latest script and deploy a new version.';
+  } catch (e) { $('status').textContent = 'Could not load the photo comp: ' + (e.message === 'Failed to fetch' || e.message.includes('JSON') ? 'the sync script has not been updated for the photo comp yet. Cam needs to paste in the latest script and deploy a new version.' : e.message); state = null; render(); }
 }
 const ERR = { limit: 'You already have 2 entries in that category. Delete one first.', own_photo: "You can't score your own photo.", not_in_comp: 'Only the original five can enter.', bad_image: 'That photo could not be read. Try another.', admin_only: 'Only Cam can do that.' };
 
@@ -217,7 +220,11 @@ document.querySelectorAll('.seg button').forEach((b) => b.onclick = () => { tab 
 
 /* ---------- render ---------- */
 function render() {
-  if (!state) return;
+  const live = !!state;
+  if (!state) state = { offline: true, categories: Object.keys(CAT_INFO), max: 2, entries: [], myVotes: {}, voted: {}, votable: {}, people: ORIGINALS, revealed: false, admin: false };
+  const cats = Object.keys(CAT_INFO);
+  if (state.categories.join('|') !== cats.join('|')) state.scriptOld = true;
+  state.categories = cats;
   const mine = state.entries.filter((e) => e.mine);
   // category dropdown
   const sel = $('catSel'); sel.replaceChildren();
@@ -227,7 +234,7 @@ function render() {
   $('selHint').textContent = (CAT_INFO[cat] || {}).brief || '';
   if (!justEntered && mine.filter((e) => e.category === cat).length >= state.max) $('enterMsg').textContent = `You've used both ${cat} entries.`;
   justEntered = false;
-  $('submit').disabled = !photo || mine.filter((e) => e.category === cat).length >= state.max;
+  $('submit').disabled = !!state.offline || !photo || mine.filter((e) => e.category === cat).length >= state.max;
   // my entries
   const box = $('mine'); box.replaceChildren();
   if (!mine.length) box.appendChild(el('div', 'empty', 'Nothing entered yet.'));
@@ -246,6 +253,7 @@ function photoCard(e, manage) {
 }
 function renderVote() {
   const box = $('voteList'); box.replaceChildren();
+  if (state.offline) { box.appendChild(el('div', 'empty', 'Voting opens once the photo comp is connected.')); return; }
   state.categories.forEach((c) => {
     const list = state.entries.filter((e) => e.category === c);
     const card = el('div', 'card'); const h = el('h3', null, `${(CAT_INFO[c] || {}).icon || ''} ${c}`); h.appendChild(el('small', null, `${list.length} entr${list.length === 1 ? 'y' : 'ies'}`)); card.append(h, el('p', 'note', (CAT_INFO[c] || {}).brief || ''));
@@ -271,6 +279,7 @@ function renderVote() {
 }
 function renderResults() {
   const box = $('results'); box.replaceChildren();
+  if (state.offline) { box.appendChild(el('div', 'empty', 'Results appear once the photo comp is connected.')); return; }
   const prog = el('div', 'card'); prog.append(el('h2', null, 'Voting progress'), el('p', 'note', 'Photos scored by each person.'));
   state.people.forEach((p) => { const n = state.voted[p] || 0; const of = (state.votable || {})[p] || 0; const r = el('div', 'prog'); const t = el('div', 'track'); const f = el('div', 'fill'); f.style.width = `${of ? Math.min(100, (n / of) * 100) : 0}%`; t.appendChild(f); r.append(el('div', null, p), t, el('div', 'n', `${n} of ${of}`)); prog.appendChild(r); });
   if (state.admin) { const b = el('button', 'btn' + (state.revealed ? ' alt' : ''), state.revealed ? 'Hide results again' : 'Reveal the results 🎉'); b.style.marginTop = '12px'; b.onclick = async () => { const r = await api({ action: 'reveal', value: !state.revealed }); if (!r.ok) $('status').textContent = ERR[r.error] || r.error; load(); }; prog.appendChild(b); }
