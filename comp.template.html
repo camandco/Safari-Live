@@ -75,9 +75,14 @@ td.r{text-align:right;font-variant-numeric:tabular-nums}
 .locked{text-align:center;padding:40px 20px}
 .locked .g{font-size:48px}
 [hidden]{display:none!important}
-.brief{border-radius:12px;background:var(--sand);border:1px solid var(--line);padding:10px 12px;margin-bottom:8px}
+.brief{display:block;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer;border-radius:12px;background:var(--sand);border:1px solid var(--line);padding:10px 12px;margin-bottom:8px}
 .brief.sel{border-color:var(--ochre);margin-bottom:12px}
-.brief .bt{font-weight:700;color:var(--dusk)}
+.brief .bt{font-weight:700;color:var(--dusk);display:flex;justify-content:space-between;gap:8px}
+.brief .cnt{font-size:12px;font-weight:700;color:var(--muted);background:var(--panel);border-radius:10px;padding:1px 8px}
+.brief.full{opacity:.6}
+.lbl{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:0 0 4px}
+.hint{font-size:13px;color:var(--muted);margin:-4px 0 10px}
+select.in{appearance:auto;font-weight:600}
 .brief .bb{font-size:14px;margin-top:2px}
 .brief .tp{font-size:13px;color:var(--muted);margin-top:4px;font-style:italic}
 </style>
@@ -96,18 +101,19 @@ td.r{text-align:right;font-variant-numeric:tabular-nums}
     <p class="msg err" id="status"></p>
 
     <section id="tab-enter">
-      <div class="card">
+      <div class="card"><h2>The categories</h2><p class="note">Nine shot briefs. Up to 2 entries in each. Tap one to enter it.</p><div id="catInfo"></div></div>
+      <div class="card" id="enterCard">
         <h2>Enter a photo</h2>
-        <p class="note">Up to 2 per category. Editing is fine (crop, colour, black and white), but no adding or removing things and no AI. Uploading needs signal.</p>
-        <div class="chips" id="catPick"></div>
-        <div class="brief sel" id="selBrief"></div>
+        <p class="note">Editing is fine (crop, colour, black and white), but no adding or removing things and no AI. Uploading needs signal.</p>
+        <label class="lbl" for="catSel">Category</label>
+        <select class="in" id="catSel"></select>
+        <p class="hint" id="selHint"></p>
         <input class="in" id="title" maxlength="60" placeholder="Give it a title (optional)">
         <label class="pick" id="pick"><span>📷</span><span id="pickT">Choose a photo</span><input type="file" id="file" accept="image/*"><img id="preview" hidden alt=""></label>
         <button class="btn" id="submit" disabled>Submit entry</button>
         <p class="msg" id="enterMsg"></p>
       </div>
       <div class="card"><h2>Your entries</h2><div id="mine"></div></div>
-      <div class="card"><h2>The briefs</h2><p class="note">What to shoot for in each category.</p><div id="catInfo"></div></div>
     </section>
 
     <section id="tab-vote" hidden>
@@ -178,7 +184,8 @@ const $ = (id) => document.getElementById(id);
 const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
 const ls = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } };
 const img = (id, w = 1200) => `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w${w}`;
-let justEntered = false; let state = null; let tab = 'enter'; let cat = 'Eye Contact'; let photo = null;
+let justEntered = false; let state = null;
+ let tab = 'enter'; let cat = 'Eye Contact'; let photo = null;
 
 const me = () => ls('me', ''); const code = () => ls('code', '');
 async function api(body) {
@@ -212,10 +219,12 @@ document.querySelectorAll('.seg button').forEach((b) => b.onclick = () => { tab 
 function render() {
   if (!state) return;
   const mine = state.entries.filter((e) => e.mine);
-  // category chips
-  const cp = $('catPick'); cp.replaceChildren();
-  state.categories.forEach((c) => { const n = mine.filter((e) => e.category === c).length; const b = el('button', c === cat ? 'on' : '', `${c} ${n}/${state.max}`); b.disabled = n >= state.max && c !== cat; b.onclick = () => { cat = c; render(); }; cp.appendChild(b); });
-  { const k = CAT_INFO[cat] || {}; const sb = $('selBrief'); sb.replaceChildren(el('div', 'bt', `${k.icon || '📷'} ${cat}`), el('div', 'bb', k.brief || ''), el('div', 'tp', k.tip ? 'Tip: ' + k.tip : '')); }
+  // category dropdown
+  const sel = $('catSel'); sel.replaceChildren();
+  state.categories.forEach((c) => { const n = mine.filter((e) => e.category === c).length; const o = new Option(`${(CAT_INFO[c] || {}).icon || ''} ${c}  (${n}/${state.max})`, c); o.disabled = n >= state.max; sel.appendChild(o); });
+  if (!state.categories.includes(cat) || mine.filter((e) => e.category === cat).length >= state.max) { const free = state.categories.find((c) => mine.filter((e) => e.category === c).length < state.max); if (free && !justEntered) cat = free; }
+  sel.value = cat;
+  $('selHint').textContent = (CAT_INFO[cat] || {}).brief || '';
   if (!justEntered && mine.filter((e) => e.category === cat).length >= state.max) $('enterMsg').textContent = `You've used both ${cat} entries.`;
   justEntered = false;
   $('submit').disabled = !photo || mine.filter((e) => e.category === cat).length >= state.max;
@@ -224,7 +233,7 @@ function render() {
   if (!mine.length) box.appendChild(el('div', 'empty', 'Nothing entered yet.'));
   else { const g = el('div', 'grid'); mine.forEach((e) => g.appendChild(photoCard(e, true))); box.appendChild(g); }
   const ci = $('catInfo'); ci.replaceChildren();
-  state.categories.forEach((c) => { const k = CAT_INFO[c] || {}; const d = el('div', 'brief'); d.append(el('div', 'bt', `${k.icon || '📷'} ${c}`), el('div', 'bb', k.brief || ''), el('div', 'tp', k.tip ? 'Tip: ' + k.tip : '')); ci.appendChild(d); });
+  state.categories.forEach((c) => { const k = CAT_INFO[c] || {}; const n = mine.filter((e) => e.category === c).length; const d = el('button', 'brief' + (n >= state.max ? ' full' : '')); d.type = 'button'; const top = el('div', 'bt', `${k.icon || '📷'} ${c}`); top.appendChild(el('span', 'cnt', `${n}/${state.max}`)); d.append(top, el('div', 'bb', k.brief || ''), el('div', 'tp', k.tip ? 'Tip: ' + k.tip : '')); d.onclick = () => { if (n >= state.max) { $('enterMsg').textContent = `You've used both ${c} entries. Delete one to swap it.`; } else { cat = c; render(); } $('enterCard').scrollIntoView({ behavior: 'smooth', block: 'start' }); }; ci.appendChild(d); });
   renderVote(); renderResults();
 }
 function photoCard(e, manage) {
@@ -287,6 +296,7 @@ function renderResults() {
 }
 
 /* ---------- entering ---------- */
+$('catSel').onchange = () => { cat = $('catSel').value; $('enterMsg').textContent = ''; render(); };
 $('file').onchange = async () => {
   const f = $('file').files[0]; if (!f) return;
   $('pickT').textContent = 'Preparing photo…'; $('enterMsg').textContent = '';
