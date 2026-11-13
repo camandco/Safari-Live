@@ -69,13 +69,12 @@ header{position:sticky;top:var(--navh,0px);z-index:10;background:linear-gradient
 <header id="hdr">
   <div class="top"><div class="brand">Log a sighting</div><button class="me" id="me">…</button></div>
   <div class="status"><span class="dot" id="dot"></span><span id="net">Checking…</span><button class="sync" id="syncBtn">Sync</button></div>
-  <div class="parks"><button data-park="Kruger">Kruger</button><button data-park="Pilanesberg">Pilanesberg</button></div>
 </header>
 
 <div class="tools" id="tools">
   <input class="search" id="q" type="search" placeholder="Search species…" autocomplete="off">
   <div class="chips" id="chips">
-    <button data-f="all" class="on">All</button><button data-f="Mammals">Mammals</button><button data-f="Birds">Birds</button><button data-f="todo">Not seen yet</button><button data-f="big5">Big Five</button>
+    <button data-f="all" class="on">All</button><button data-f="Mammals">Mammals</button><button data-f="Birds">Birds</button><button data-f="Reptiles">Reptiles</button><button data-f="todo">Not seen yet</button><button data-f="big5">Big Five</button>
   </div>
 </div>
 
@@ -101,7 +100,7 @@ header{position:sticky;top:var(--navh,0px);z-index:10;background:linear-gradient
 <script>
 const SCRIPT_URL = '__SCRIPT_URL__';
 const LOG_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTotl03LZgv5wXlVOdvTyVfAuV8-SBGbSiKh4qgMMcCRGJbKgHIKiyuXwOh6kTGwUXQ2FarxInyJath/pub?gid=900010&single=true&output=csv';
-const NAMES = ['Cam', 'Melissa', 'Keegan', 'Mark', 'Tracy', 'Karen', 'Mac', 'Leigh', 'Daniel', 'Troy'];
+const NAMES = ['Cam', 'Melissa', 'Keegan', 'Mark', 'Tracy'];
 const SPECIES = __SPECIES__;
 const RANK = { 'Very Common': 1, Common: 2, 'Fairly Common': 3, Uncommon: 4, Occasional: 5, Rare: 6, 'Very Rare': 7, 'Not typically present': 8 };
 
@@ -109,7 +108,7 @@ const $ = (id) => document.getElementById(id);
 const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
 const ls = { get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } } };
 
-let me = ls.get('me', ''); let code = ls.get('code', ''); let park = ls.get('park', 'Kruger');
+let me = ls.get('me', ''); let code = ls.get('code', ''); const park = 'Kruger';
 let queue = ls.get('queue', []); let server = ls.get('server', {}); let filter = 'all'; let lastSaved = null;
 
 const parkOf = (tab) => tab.split(' ')[0];
@@ -124,7 +123,7 @@ function render() {
   const q = $('q').value.trim().toLowerCase();
   const pending = new Map(queue.map((i) => [key(i.tab, i.species), i]));
   const rows = SPECIES.filter(([tab, sp, rar, cat]) => parkOf(tab) === park
-    && (filter === 'all' || (filter === 'Mammals' && tab.endsWith('Mammals')) || (filter === 'Birds' && tab.endsWith('Birds')) || (filter === 'big5' && cat === 'Big Five') || (filter === 'todo' && !server[key(tab, sp)] && !pending.has(key(tab, sp))))
+    && (filter === 'all' || (filter === 'Mammals' && tab.endsWith('Mammals')) || (filter === 'Birds' && tab.endsWith('Birds')) || (filter === 'Reptiles' && tab.endsWith('Reptiles')) || (filter === 'big5' && cat === 'Big Five') || (filter === 'todo' && !server[key(tab, sp)] && !pending.has(key(tab, sp))))
     && (!q || sp.toLowerCase().includes(q) || cat.toLowerCase().includes(q)))
     .sort((a, b) => (RANK[a[2]] || 9) - (RANK[b[2]] || 9) || a[1].localeCompare(b[1]));
   const list = $('list'); list.replaceChildren();
@@ -134,7 +133,7 @@ function render() {
     const card = el('div', 'sp' + (s || p ? ' is-seen' : ''));
     const info = el('div');
     info.appendChild(el('h3', null, sp));
-    const meta = el('div', 'meta'); meta.append(el('span', 'pill ' + pillCls(rar), rar), `${tab.endsWith('Birds') ? 'Bird' : 'Mammal'} · ${where}`);
+    const meta = el('div', 'meta'); meta.append(el('span', 'pill ' + pillCls(rar), rar), `${tab.endsWith('Birds') ? 'Bird' : tab.endsWith('Reptiles') ? 'Reptile' : 'Mammal'} · ${where}`);
     info.appendChild(meta);
     if (s) info.appendChild(el('div', 'seen', `✓ ${s.who || 'Seen'}${s.when ? ' · ' + s.when : ''}`));
     else if (p) info.appendChild(el('div', 'seen wait', `⏳ ${p.who} · ${fmt(p.ts)} · waiting to sync`));
@@ -182,7 +181,7 @@ $('cNo').onclick = closeConfirm;
 
 /* ---------- sync ---------- */
 let syncing = false; let syncMsg = '';
-const VERSION = 'v17';
+const VERSION = 'v18';
 async function sync(manual) {
   updateNet();
   if (!navigator.onLine) { if (manual) toast('No signal right now. Your ticks are safe on this phone.'); return; }
@@ -217,7 +216,7 @@ async function sync(manual) {
 async function pull() {
   const res = await fetch(LOG_CSV + '&t=' + Date.now()); if (!res.ok) return;
   const rows = parse(await res.text()).slice(1).filter((r) => r[4]);
-  const map = {}; rows.forEach((r) => { const tab = `${r[3]} ${r[8] === 'Bird' ? 'Birds' : 'Mammals'}`; map[key(tab, r[4])] = { who: r[2], when: `${r[0]} ${r[1]}`.trim() }; });
+  const map = {}; rows.forEach((r) => { const tab = `${r[3]} ${r[8] === 'Bird' ? 'Birds' : r[8] === 'Reptile' ? 'Reptiles' : 'Mammals'}`; map[key(tab, r[4])] = { who: r[2], when: `${r[0]} ${r[1]}`.trim() }; });
   server = map; ls.set('server', server); ls.set('pulledAt', Date.now());
 }
 function parse(text) { const rows = []; let row = []; let cell = ''; let q = false; for (let i = 0; i < text.length; i++) { const c = text[i]; if (q) { if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c; } else if (c === '"') q = true; else if (c === ',') { row.push(cell); cell = ''; } else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; } else if (c !== '\r') cell += c; } if (cell || row.length) { row.push(cell); rows.push(row); } return rows; }
@@ -237,7 +236,6 @@ $('me').onclick = () => window.SafariAuth && SafariAuth.switchUser();
 addEventListener('safari-login', () => { me = ls.get('me', ''); code = ls.get('code', ''); render(); sync(); });
 
 /* ---------- controls ---------- */
-document.querySelectorAll('.parks button').forEach((b) => b.onclick = () => { park = b.dataset.park; ls.set('park', park); render(); scrollTo(0, 0); });
 $('chips').onclick = (e) => { const b = e.target.closest('button'); if (!b) return; filter = b.dataset.f; $('chips').querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); render(); };
 $('q').oninput = render;
 const setHH = () => document.documentElement.style.setProperty('--hh', $('hdr').offsetHeight + 'px'); addEventListener('resize', setHH);

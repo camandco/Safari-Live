@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Safari Live</title>
-<meta name="description" content="Live sightings from our Kruger and Pilanesberg trip">
+<meta name="description" content="Live sightings from our Kruger trip">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23E0892F'/%3E%3Cpath d='M18 54V40h4v14zm8 0V40h4v14zm12 0V36h4v18zm8 0V36h4v18zM16 42q0-8 10-8l18-6q6 2 5 10l-21 6zM42 34l10-24 5 1-9 26z' fill='%233B2416'/%3E%3C/svg%3E">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#8C3B1E">
@@ -162,7 +162,7 @@ h1{font-family:"DM Serif Display",Georgia,serif;font-weight:400;font-size:46px;l
   <div class="orb" id="orb"></div>
   <div id="sky-fx"></div>
   <div class="hero-in">
-    <p class="kick">Kruger · Pilanesberg · Sun City</p>
+    <p class="kick">Kruger · Sun City</p>
     <h1>Safari Live</h1>
     <p class="take" id="take">Loading the latest sightings…</p>
     <a class="tickbtn" href="tick.html">+ Tick a sighting</a><span class="clock" id="clock"></span>
@@ -214,7 +214,7 @@ h1{font-family:"DM Serif Display",Georgia,serif;font-weight:400;font-size:46px;l
   <section class="tiles">
     <div class="tile"><div class="l">Sightings</div><div class="v" id="t-n"><span class="skel"></span></div><div class="s">ticked by the group</div></div>
     <div class="tile"><div class="l">Species</div><div class="v" id="t-s"><span class="skel"></span></div><div class="s">different animals and birds</div></div>
-    <div class="tile"><div class="l">Big Five</div><div class="v"><span id="t-b5"><span class="skel"></span></span> <small>of 5</small></div><div class="s">in either park</div></div>
+    <div class="tile"><div class="l">Big Five</div><div class="v"><span id="t-b5"><span class="skel"></span></span> <small>of 5</small></div><div class="s">spotted so far</div></div>
     <div class="tile"><div class="l">Rare finds</div><div class="v" id="t-r"><span class="skel"></span></div><div class="s">rare or better</div></div>
   </section>
 
@@ -265,7 +265,7 @@ const LOG_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTotl03LZgv5wXl
 const SUMMARY_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTotl03LZgv5wXlVOdvTyVfAuV8-SBGbSiKh4qgMMcCRGJbKgHIKiyuXwOh6kTGwUXQ2FarxInyJath/pub?gid=900001&single=true&output=csv';
 const pl = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 const an = (w) => (/^[aeiou]/i.test(w) ? 'an ' : 'a ') + w;
-const NAMES = ['Cam', 'Melissa', 'Keegan', 'Mark', 'Tracy', 'Karen', 'Mac', 'Leigh', 'Daniel', 'Troy'];
+const NAMES = ['Cam', 'Melissa', 'Keegan', 'Mark', 'Tracy'];
 const RARE = ['Occasional', 'Rare', 'Very Rare', 'Not typically present'];
 const params = new URLSearchParams(location.search);
 
