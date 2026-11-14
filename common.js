@@ -10,64 +10,38 @@
   };
   const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
 
-  const css = `
-  .sx-nav{position:sticky;top:0;z-index:60;background:#2A1A10;color:#FFF1DC;padding:calc(8px + env(safe-area-inset-top)) 12px 8px;display:flex;align-items:center;gap:12px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;box-shadow:0 2px 10px rgba(0,0,0,.25)}
-  .sx-burger{width:40px;height:40px;border:0;border-radius:10px;background:rgba(255,255,255,.1);display:grid;place-items:center;cursor:pointer;flex:none}
-  .sx-burger span{display:block;width:20px;height:2px;background:#FFE9CC;border-radius:2px;box-shadow:0 -6px 0 #FFE9CC,0 6px 0 #FFE9CC}
-  .sx-title{font-family:"DM Serif Display",Georgia,serif;font-size:19px;color:#F6C46B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .sx-title small{font-family:Inter,sans-serif;font-size:13px;color:#C9B38A;margin-left:8px}
-  .sx-shade{position:fixed;inset:0;z-index:90;background:rgba(20,12,6,.5);opacity:0;pointer-events:none;transition:opacity .25s}
-  .sx-shade.open{opacity:1;pointer-events:auto}
-  .sx-drawer{position:fixed;top:0;bottom:0;left:0;z-index:91;width:min(82vw,300px);background:#FFFBF3;color:#3E2723;transform:translateX(-102%);transition:transform .3s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;box-shadow:8px 0 30px rgba(0,0,0,.3)}
-  .sx-drawer.open{transform:none}
-  .sx-dhead{background:linear-gradient(180deg,#E0892F,#8C3B1E);color:#FFF8EC;padding:calc(22px + env(safe-area-inset-top)) 18px 18px}
-  .sx-dhead .g{font-size:34px;line-height:1}
-  .sx-dhead .t{font-family:"DM Serif Display",Georgia,serif;font-size:24px;margin-top:6px}
-  .sx-dhead .u{font-size:13px;opacity:.9;margin-top:2px}
-  .sx-links{padding:10px 8px;display:flex;flex-direction:column;gap:2px}
-  .sx-links a,.sx-links button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;background:none;color:inherit;text-decoration:none;font-size:16px;font-weight:600;padding:13px 12px;border-radius:10px;cursor:pointer;font-family:inherit}
-  .sx-links a.on{background:#F3E4C8;color:#8C3B1E}
-  .sx-links a:hover,.sx-links button:hover{background:#F4EBD9}
-  .sx-links i{font-style:normal;width:24px;text-align:center;font-size:18px}
-  .sx-links a[hidden]{display:none}
-  .sx-sep{height:1px;background:#E2D3B5;margin:8px 12px}
-  .sx-links button{font-weight:500;color:#7A6450}
-  .sx-login{position:fixed;inset:0;z-index:100;background:linear-gradient(180deg,#F6C46B 0%,#E0892F 45%,#8C3B1E 100%);display:flex;align-items:center;justify-content:center;padding:20px;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-  .sx-login[hidden]{display:none}
-  .sx-card{background:#FFFBF3;color:#3E2723;width:min(100%,420px);border-radius:20px;padding:24px 20px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
-  .sx-card h2{font-family:"DM Serif Display",Georgia,serif;font-weight:400;font-size:30px;margin:0;color:#2F4F2F}
-  .sx-card p{margin:6px 0 14px;color:#7A6450;font-size:14px}
-  .sx-in{width:100%;font-size:18px;padding:13px 14px;border-radius:12px;border:1px solid #E2D3B5;background:#F4EBD9;color:#3E2723;margin-bottom:12px}
-  .sx-go{width:100%;border:0;border-radius:12px;padding:14px;font-size:16px;font-weight:700;background:#C8742B;color:#fff;cursor:pointer}
-  .sx-names{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 4px}
-  .sx-names button{border:2px solid #E2D3B5;background:#F4EBD9;color:#3E2723;border-radius:12px;padding:16px 10px;font-size:17px;font-weight:600;cursor:pointer}
-  .sx-names button:hover{border-color:#C8742B}
-  .sx-err{color:#B3261E;font-size:14px;min-height:1.2em;margin:8px 0 0}
-  .sx-giraffe{font-size:40px;line-height:1}`;
-  document.head.appendChild(Object.assign(document.createElement('style'), { textContent: css }));
-
+  const IC = {
+    dashboard: '<path d="M4 13h6V4H4zM14 20h6v-9h-6zM4 20h6v-3H4zM14 7h6V4h-6z"/>',
+    tick: '<circle cx="12" cy="12" r="8.5"/><path d="M8 12.5l3 3 5-6.5"/>',
+    comp: '<path d="M4 8h3l1.5-2.5h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+    help: '<path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3zM9 9h6M9 13h6"/>',
+    user: '<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c.6-4 3.4-6 7-6s6.4 2 7 6"/>',
+    lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>',
+  };
+  const icon = (k) => { const s = document.createElement('span'); s.style.display = 'contents'; s.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`; return s.firstChild; };
   /* ---------- menu ---------- */
   const nav = el('nav', 'sx-nav');
   const burger = el('button', 'sx-burger'); burger.type = 'button'; burger.setAttribute('aria-label', 'Open menu'); burger.appendChild(el('span'));
-  const title = el('div', 'sx-title', ({ tick: 'Log sightings', comp: 'Photo comp' })[page] || 'Safari Live');
-  nav.append(burger, title);
+  const title = el('div', 'sx-title', ({ tick: 'Log sightings', comp: 'Photo comp', help: 'How to use' })[page] || 'Safari Live');
+  const off = el('span', 'sx-off', 'No signal'); const net = () => { off.hidden = navigator.onLine; }; addEventListener('online', net); addEventListener('offline', net); net();
+  nav.append(burger, title, off);
   document.body.prepend(nav);
   const shade = el('div', 'sx-shade');
   const drawer = el('aside', 'sx-drawer'); drawer.setAttribute('aria-label', 'Menu');
   const head = el('div', 'sx-dhead'); const who = el('div', 'u');
-  head.append(el('div', 'g', '🦒'), el('div', 't', 'Safari Live'), who);
+  head.append(el('div', 't', 'Safari Live'), who);
   const links = el('div', 'sx-links');
   const ORIGINALS = ['Cam', 'Melissa', 'Keegan', 'Mark', 'Tracy'];
   const compLinks = [];
-  [['dashboard', './', '📊', 'Dashboard'], ['tick', 'tick.html', '✅', 'Log sightings'], ['comp', 'comp.html', '📸', 'Photo comp'], ['help', 'help.html', '📖', 'How to use']].forEach(([id, href, ic, label]) => {
-    const a = el('a', page === id ? 'on' : ''); a.href = href; a.append(el('i', null, ic), label); links.appendChild(a);
+  [['dashboard', './', 'Dashboard'], ['tick', 'tick.html', 'Log sightings'], ['comp', 'comp.html', 'Photo comp'], ['help', 'help.html', 'How to use']].forEach(([id, href, label]) => {
+    const a = el('a', page === id ? 'on' : ''); a.href = href; a.append(icon(id), label); if (page === id) a.setAttribute('aria-current', 'page'); links.appendChild(a);
     if (id === 'comp') compLinks.push(a);
   });
   links.appendChild(el('div', 'sx-sep'));
-  const sw = el('button'); sw.type = 'button'; sw.append(el('i', null, '👤'), 'Switch person');
-  const out = el('button'); out.type = 'button'; out.append(el('i', null, '🔒'), 'Log out');
+  const sw = el('button'); sw.type = 'button'; sw.append(icon('user'), 'Switch person');
+  const out = el('button'); out.type = 'button'; out.append(icon('lock'), 'Log out');
   links.append(sw, out);
-  drawer.append(head, links);
+  drawer.append(head, links, el('div', 'sx-ver', 'Works without signal. Version 19.'));
   document.body.append(shade, drawer);
   const openMenu = (o) => { drawer.classList.toggle('open', o); shade.classList.toggle('open', o); };
   burger.onclick = () => openMenu(true); shade.onclick = () => openMenu(false);
@@ -88,7 +62,7 @@
   }
   function showPassword() {
     card.replaceChildren();
-    card.append(el('div', 'sx-giraffe', '🦒'), el('h2', null, 'Safari Live'), el('p', null, 'Enter the trip password to come in.'));
+    card.append(el('h2', null, 'Safari Live'), el('p', null, 'Enter the trip password to come in.'));
     const inp = el('input', 'sx-in'); inp.type = 'password'; inp.placeholder = 'Trip password'; inp.autocapitalize = 'characters'; inp.autocomplete = 'current-password';
     const go = el('button', 'sx-go', 'Enter'); const err = el('p', 'sx-err');
     card.append(inp, go, err);
@@ -104,13 +78,13 @@
   }
   function showNames() {
     card.replaceChildren();
-    card.append(el('div', 'sx-giraffe', '🦒'), el('h2', null, 'Who are you?'), el('p', null, 'Everything you log on this phone is saved under your name.'));
+    card.append(el('h2', null, 'Who are you?'), el('p', null, 'Everything you log on this phone is saved under your name.'));
     const grid = el('div', 'sx-names');
     NAMES.forEach((n) => { const b = el('button', null, n); b.type = 'button'; b.onclick = () => { ls.set('me', n); box.hidden = true; refresh(); window.dispatchEvent(new CustomEvent('safari-login', { detail: { me: n } })); }; grid.appendChild(b); });
     card.appendChild(grid);
     box.hidden = false;
   }
-  function refresh() { const m = ls.get('me', ''); compLinks.forEach((x) => { x.hidden = !ORIGINALS.includes(m); }); who.textContent = m ? `Signed in as ${m}` : 'Not signed in'; title.replaceChildren(({ tick: 'Log sightings', comp: 'Photo comp' })[page] || 'Safari Live'); if (m) title.appendChild(el('small', null, m)); }
+  function refresh() { const m = ls.get('me', ''); compLinks.forEach((x) => { x.hidden = !ORIGINALS.includes(m); }); who.textContent = m ? `Signed in as ${m}` : 'Not signed in'; title.replaceChildren(({ tick: 'Log sightings', comp: 'Photo comp', help: 'How to use' })[page] || 'Safari Live'); if (m) title.appendChild(el('small', null, m)); }
 
   window.SafariAuth = { me: () => ls.get('me', ''), code: () => ls.get('code', ''), switchUser: showNames };
   refresh();

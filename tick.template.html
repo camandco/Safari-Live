@@ -4,86 +4,85 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Safari Tick</title>
-<meta name="theme-color" content="#8C3B1E">
+<meta name="theme-color" content="#132A1E">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Safari Tick">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preload" href="fonts/barlowc-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="app.css">
 <style>
-:root{--sand:#F4EBD9;--sand2:#EADBC0;--khaki:#C9B38A;--bush:#2F4F2F;--bush2:#4E6B3A;--ochre:#C8742B;--dusk:#8C3B1E;--ink:#3E2723;--muted:#7A6450;--panel:#FFFBF3;--line:#E2D3B5;--gold:#E8B53C;--ok:#2E7D32;--bad:#B3261E}
-@media (prefers-color-scheme:dark){:root{--sand:#1F1A14;--sand2:#2A231B;--khaki:#6E5C40;--bush:#9CC088;--bush2:#7FA266;--ochre:#E39A55;--ink:#F2E7D5;--muted:#BCA88C;--panel:#2A231B;--line:#3D3326}}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:var(--sand);color:var(--ink);font-family:Georgia,"Times New Roman",serif;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.4;padding-bottom:calc(90px + env(safe-area-inset-bottom))}
-header{position:sticky;top:var(--navh,0px);z-index:10;background:linear-gradient(180deg,#E0892F 0%,#8C3B1E 100%);color:#FFF8EC;padding:10px 14px 12px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.brand{font-family:Georgia,serif;font-size:22px}
-.me{font-size:13px;background:rgba(255,255,255,.18);border:0;color:#fff;border-radius:20px;padding:5px 12px}
-.status{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px}
-.dot{width:9px;height:9px;border-radius:50%;background:#9be29b;flex:none}.dot.off{background:#ffb4a8}
-.sync{margin-left:auto;border:0;border-radius:20px;padding:5px 12px;background:#FFF8EC;color:#8C3B1E;font-weight:700;font-size:13px}
-.parks{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;background:rgba(0,0,0,.18);padding:4px;border-radius:12px}
-.parks button{border:0;border-radius:9px;padding:9px;font-size:15px;font-weight:600;background:transparent;color:#FFE9CC}
-.parks button.on{background:#FFF8EC;color:#8C3B1E}
-.tools{padding:12px 14px 4px;display:flex;flex-direction:column;gap:8px;position:sticky;top:calc(var(--navh,0px) + var(--hh,150px));z-index:9;background:var(--sand)}
-.search{width:100%;font-size:16px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
-.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
-.chips button{flex:none;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:20px;padding:6px 13px;font-size:14px}
-.chips button.on{background:var(--bush2);border-color:var(--bush2);color:#fff}
-.list{padding:6px 14px;display:flex;flex-direction:column;gap:10px}
-.sp{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 12px 12px 14px}
-.sp h3{margin:0;font-size:17px;color:var(--bush)}
-.sp .meta{font-size:12px;color:var(--muted);margin-top:2px}
-.pill{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:10px;margin-right:6px;background:var(--sand2);color:var(--dusk)}
-.pill.c{color:#2E7D32}.pill.u{color:#E65100}.pill.r{color:#BF360C}.pill.v{color:#880E4F}
-.sp .seen{font-size:12px;color:var(--ok);font-weight:600;margin-top:4px}
-.sp .wait{color:var(--ochre)}
-.btn{border:0;border-radius:12px;padding:12px 14px;font-size:15px;font-weight:700;background:var(--ochre);color:#fff;min-width:84px}
-.btn.done{background:var(--sand2);color:var(--muted)}
-.sp.is-seen{opacity:.75}
-.empty{color:var(--muted);text-align:center;padding:30px 10px}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translate(-50%,calc(100% + 60px));opacity:0;visibility:hidden;transition:transform .35s,opacity .35s,visibility 0s .35s;z-index:30;background:#3E2723;color:#FFF8EC;border-radius:14px;padding:12px 14px;display:flex;gap:12px;align-items:center;width:min(94vw,460px);box-shadow:0 10px 30px rgba(0,0,0,.3);font-size:14px}
-.toast.show{transform:translate(-50%,0);opacity:1;visibility:visible;transition:transform .35s,opacity .35s,visibility 0s}
-.toast button{margin-left:auto;border:0;background:#FFF8EC;color:#3E2723;font-weight:700;border-radius:10px;padding:7px 12px}
-.sheet{position:fixed;inset:0;z-index:40;background:rgba(30,20,10,.55);display:flex;align-items:flex-end;justify-content:center}
-.sheet[hidden]{display:none}
-.card{background:var(--panel);width:min(100%,520px);border-radius:20px 20px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
-.card h2{margin:0 0 4px;font-family:Georgia,serif;font-weight:400;font-size:26px;color:var(--bush)}
-.card p{margin:4px 0 14px;color:var(--muted);font-size:14px}
-.names{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-.names button{border:2px solid var(--line);background:var(--sand);color:var(--ink);border-radius:12px;padding:14px;font-size:17px;font-weight:600}
-.names button.on{border-color:var(--ochre);background:var(--ochre);color:#fff}
-.field{width:100%;font-size:18px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--sand);color:var(--ink);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px}
-.wide{width:100%}
-.gps{font-size:13px;color:var(--muted);margin:-6px 0 14px}
-.queue{padding:14px}
-.queue h4{margin:10px 0 6px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-.qi{font-size:13px;padding:8px 0;border-bottom:1px dashed var(--line);display:flex;justify-content:space-between;gap:10px}
-.foot{font-size:12px;color:var(--muted);text-align:center;padding:16px}
-.foot a{color:var(--ochre)}
-.err{color:var(--bad)}
+body{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+#hdr{background:var(--board);color:var(--on-board);padding:12px 14px 12px}
+.tally{display:flex;align-items:baseline;gap:8px}
+.tally b{font-family:var(--display);font-weight:700;font-size:40px;line-height:.9;color:var(--sign);font-variant-numeric:tabular-nums}
+.tally span{font-size:15px;color:var(--on-board-muted)}
+.me{margin-left:auto;align-self:center;font-size:14px;font-weight:600;background:rgba(255,255,255,.1);border:0;color:var(--on-board);border-radius:8px;padding:8px 12px}
+.meter{height:6px;border-radius:3px;background:rgba(255,255,255,.14);margin-top:10px;overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--sign);border-radius:3px;transition:width .5s ease}
+.status{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:14px;min-height:32px}
+.dot{width:10px;height:10px;border-radius:50%;background:#7FD99A;flex:none}.dot.off{background:var(--sign)}
+.sync{margin-left:auto;border:0;border-radius:8px;padding:7px 14px;background:var(--on-board);color:#15241B;font-weight:700;font-size:14px}
+.tools{padding:10px 14px 6px;display:flex;flex-direction:column;gap:8px;position:sticky;top:var(--navh,0px);z-index:9;background:var(--bg);border-bottom:1px solid var(--line)}
+.search{width:100%;font-size:17px;padding:12px 14px;border-radius:8px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink)}
+.search:focus{border-color:var(--board);outline:0}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:7px 13px;font-size:15px;font-weight:500}
+.chips button.on{background:var(--board);border-color:var(--board);color:var(--sign);font-weight:700}
+.grp{display:flex;justify-content:space-between;align-items:baseline;padding:18px 14px 6px;font-family:var(--display);font-weight:700;font-size:20px}
+.grp span{font-family:var(--body);font-weight:500;font-size:13px;color:var(--muted)}
+.rows{background:var(--panel);border-block:1px solid var(--line)}
+.sp{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px 14px;border-top:1px solid var(--line);content-visibility:auto;contain-intrinsic-size:auto 72px}
+.sp:first-child{border-top:0}
+.sp h3{font-size:22px;font-weight:600}
+.sp .meta{font-size:14px;color:var(--muted);margin-top:3px}
+.sp .meta b{font-weight:600;color:var(--ink)}
+.sp .seen{font-size:14px;color:var(--ok);font-weight:600;margin-top:4px}
+.sp .wait{color:var(--warn)}
+.sp.is-seen h3{color:var(--muted)}
+.sp .btn.done{opacity:1;min-width:88px;background:transparent;color:var(--ok);box-shadow:inset 0 0 0 1.5px var(--line)}
+.empty{text-align:center;padding:40px 16px}
+.queue{padding:6px 14px}
+.queue h4{margin:18px 0 4px;font-family:var(--display);font-size:20px}
+.qi{font-size:14px;padding:9px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
+.qi span:last-child{color:var(--muted);text-align:right}
+.foot{font-size:13px;color:var(--muted);text-align:center;padding:20px 16px}
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translate(-50%,calc(100% + 60px));opacity:0;visibility:hidden;transition:transform .3s,opacity .3s,visibility 0s .3s;z-index:30;background:var(--board2);color:var(--on-board);border-radius:10px;padding:12px 12px 12px 16px;display:flex;gap:12px;align-items:center;width:min(94vw,460px);box-shadow:0 10px 30px rgba(0,0,0,.35);font-size:15px;border-left:5px solid var(--sign)}
+.toast.show{transform:translate(-50%,0);opacity:1;visibility:visible;transition:transform .3s,opacity .3s,visibility 0s}
+.toast button{margin-left:auto;border:0;background:var(--on-board);color:#15241B;font-weight:700;border-radius:8px;padding:8px 13px;font-size:14px}
+.sheet{position:fixed;inset:0;z-index:40;background:rgba(8,16,11,.6);display:flex;align-items:flex-end;justify-content:center}
+.card{background:var(--panel);width:min(100%,520px);border-radius:16px 16px 0 0;padding:22px 18px calc(22px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto;border-top:5px solid var(--sign);animation:up .22s cubic-bezier(.2,.8,.2,1)}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+.card h2{font-size:38px}
+.card p{margin:6px 0 14px;color:var(--muted);font-size:15px}
+.card .gps{color:var(--ink);font-weight:600;background:var(--sunk);border-radius:8px;padding:10px 12px;margin:0 0 14px}
+.card .btn{padding:16px;font-size:18px}
+.card .btn+.btn{margin-top:10px}
 </style>
 </head>
 <body data-page="tick">
 <header id="hdr">
-  <div class="top"><div class="brand">Log a sighting</div><button class="me" id="me">…</button></div>
-  <div class="status"><span class="dot" id="dot"></span><span id="net">Checking…</span><button class="sync" id="syncBtn">Sync</button></div>
+  <div class="tally"><b id="seenN">0</b><span id="seenOf"></span><button class="me" id="me">…</button></div>
+  <div class="meter"><i id="meter"></i></div>
+  <div class="status"><span class="dot" id="dot"></span><span id="net">Checking…</span><button class="sync" id="syncBtn">Sync now</button></div>
 </header>
 
 <div class="tools" id="tools">
-  <input class="search" id="q" type="search" placeholder="Search species…" autocomplete="off">
+  <input class="search" id="q" type="search" placeholder="Search animals and birds" autocomplete="off" aria-label="Search animals and birds">
   <div class="chips" id="chips">
-    <button data-f="all" class="on">All</button><button data-f="Mammals">Mammals</button><button data-f="Birds">Birds</button><button data-f="Reptiles">Reptiles</button><button data-f="todo">Not seen yet</button><button data-f="big5">Big Five</button>
+    <button data-f="all" class="on">All</button><button data-f="todo">Not seen yet</button><button data-f="Mammals">Mammals</button><button data-f="Birds">Birds</button><button data-f="Reptiles">Reptiles</button><button data-f="big5">Big Five</button>
   </div>
 </div>
 
 <div class="list" id="list"></div>
 
 <div class="queue" id="queue"></div>
-<p class="foot">See everyone's sightings on <a href="./">Safari Live</a>. Works without signal once added to your home screen. <span id="ver"></span></p>
+<p class="foot">Sightings are saved on this phone first, then sent to the group when there is signal. <span id="ver"></span></p>
 
-<div class="toast" id="toast"><span id="toastT"></span><button id="undo">Undo</button></div>
+<div class="toast" id="toast" role="status"><span id="toastT"></span><button id="undo">Undo</button></div>
 
 <div class="sheet" id="confirm" hidden>
   <div class="card">
@@ -91,8 +90,7 @@ header{position:sticky;top:var(--navh,0px);z-index:10;background:linear-gradient
     <p id="cSub"></p>
     <p class="gps" id="cGps">Getting your location…</p>
     <button class="btn wide" id="cYes">Seen it</button>
-    <p></p>
-    <button class="btn wide done" id="cNo">Cancel</button>
+    <button class="btn wide alt" id="cNo">Cancel</button>
   </div>
 </div>
 
@@ -118,36 +116,44 @@ const pillCls = (r) => ({ 'Very Common': 'c', Common: 'c', 'Fairly Common': 'c',
 
 /* ---------- list ---------- */
 function render() {
-  document.querySelectorAll('.parks button').forEach((b) => b.classList.toggle('on', b.dataset.park === park));
-  $('me').textContent = me ? `Logging as ${me}` : 'Sign in';
+  $('me').textContent = me ? 'Switch person' : 'Sign in';
   const q = $('q').value.trim().toLowerCase();
   const pending = new Map(queue.map((i) => [key(i.tab, i.species), i]));
-  const rows = SPECIES.filter(([tab, sp, rar, cat]) => parkOf(tab) === park
-    && (filter === 'all' || (filter === 'Mammals' && tab.endsWith('Mammals')) || (filter === 'Birds' && tab.endsWith('Birds')) || (filter === 'Reptiles' && tab.endsWith('Reptiles')) || (filter === 'big5' && cat === 'Big Five') || (filter === 'todo' && !server[key(tab, sp)] && !pending.has(key(tab, sp))))
+  const got = SPECIES.filter(([tab, sp]) => server[key(tab, sp)] || pending.has(key(tab, sp))).length;
+  $('seenN').textContent = got; $('seenOf').textContent = `of ${SPECIES.length} species seen`; $('meter').style.width = (got / SPECIES.length) * 100 + '%';
+  const rows = SPECIES.filter(([tab, sp, rar, cat]) => (filter === 'all' || (filter === 'Mammals' && tab.endsWith('Mammals')) || (filter === 'Birds' && tab.endsWith('Birds')) || (filter === 'Reptiles' && tab.endsWith('Reptiles')) || (filter === 'big5' && cat === 'Big Five') || (filter === 'todo' && !server[key(tab, sp)] && !pending.has(key(tab, sp))))
     && (!q || sp.toLowerCase().includes(q) || cat.toLowerCase().includes(q)))
     .sort((a, b) => (RANK[a[2]] || 9) - (RANK[b[2]] || 9) || a[1].localeCompare(b[1]));
-  const list = $('list'); list.replaceChildren();
-  if (!rows.length) list.appendChild(el('div', 'empty', q ? 'No species match that search.' : 'Nothing left here. Nice spotting!'));
+  const list = document.createDocumentFragment();
+  if (!rows.length) list.appendChild(el('div', 'empty', q ? 'No species match that search.' : filter === 'todo' ? 'Everything here has been seen. Nice spotting!' : 'Nothing in this list.'));
+  let box = null; let last = null;
   rows.forEach(([tab, sp, rar, cat, where]) => {
+    if (rar !== last) {
+      last = rar; const n = rows.filter((r) => r[2] === rar).length;
+      const g = el('div', 'grp ' + rcls(rar), rar); g.appendChild(el('span', null, `${n} species`)); list.appendChild(g);
+      box = el('div', 'rows'); list.appendChild(box);
+    }
     const s = server[key(tab, sp)]; const p = pending.get(key(tab, sp));
     const card = el('div', 'sp' + (s || p ? ' is-seen' : ''));
     const info = el('div');
     info.appendChild(el('h3', null, sp));
-    const meta = el('div', 'meta'); meta.append(el('span', 'pill ' + pillCls(rar), rar), `${tab.endsWith('Birds') ? 'Bird' : tab.endsWith('Reptiles') ? 'Reptile' : 'Mammal'} · ${where}`);
+    const meta = el('div', 'meta'); meta.append(el('b', null, tab.endsWith('Birds') ? 'Bird' : tab.endsWith('Reptiles') ? 'Reptile' : 'Mammal'), ' ' + where.charAt(0).toLowerCase() + where.slice(1));
     info.appendChild(meta);
-    if (s) info.appendChild(el('div', 'seen', `✓ ${s.who || 'Seen'}${s.when ? ' · ' + s.when : ''}`));
-    else if (p) info.appendChild(el('div', 'seen wait', `⏳ ${p.who} · ${fmt(p.ts)} · waiting to sync`));
-    const b = el('button', 'btn' + (s || p ? ' done' : ''), s || p ? 'Seen' : 'Seen it');
-    if (!s && !p) b.onclick = () => ask(tab, sp, rar);
-    card.append(info, b); list.appendChild(card);
+    if (s) info.appendChild(el('div', 'seen', `${s.who || 'Seen'}${s.when ? ', ' + s.when : ''}`));
+    else if (p) info.appendChild(el('div', 'seen wait', `Waiting to sync. ${p.who}, ${fmt(p.ts)}`));
+    const b = el('button', 'btn' + (s || p ? ' done' : ''), s || p ? '✓ Seen' : 'Seen it');
+    if (!s && !p) b.onclick = () => ask(tab, sp, rar); else b.disabled = true;
+    card.append(info, b); box.appendChild(card);
   });
+  $('list').replaceChildren(list);
   renderQueue();
 }
+const rcls = (r) => ({ 'Very Common': 'r-common', Common: 'r-common', 'Fairly Common': 'r-common', Uncommon: 'r-unc', Occasional: 'r-unc', Rare: 'r-rare', 'Very Rare': 'r-vrare' }[r] || 'r-none');
 function renderQueue() {
   const box = $('queue'); box.replaceChildren();
   if (!queue.length) return;
   box.appendChild(el('h4', null, `Waiting to sync (${queue.length})`));
-  queue.slice().reverse().forEach((i) => { const r = el('div', 'qi'); r.append(el('span', null, `${i.species} · ${parkOf(i.tab)}`), el('span', null, `${i.who} · ${fmt(i.ts)}${i.lat ? ' · 📍' : ''}`)); box.appendChild(r); });
+  queue.slice().reverse().forEach((i) => { const r = el('div', 'qi'); r.append(el('span', null, i.species), el('span', null, `${i.who}, ${fmt(i.ts)}${i.lat ? ', with GPS' : ''}`)); box.appendChild(r); });
 }
 
 /* ---------- ticking ---------- */
@@ -155,11 +161,11 @@ let fix = null; let watch = null;
 function ask(tab, sp, rar) {
   if (!me || !code) { window.SafariAuth && SafariAuth.switchUser(); return; }
   $('cName').textContent = sp;
-  $('cSub').textContent = `${parkOf(tab)} · ${rar} · spotted by ${me}`;
+  $('cSub').textContent = `${rar}. Spotted by ${me}.`;
   $('cGps').textContent = 'Getting your location…';
   fix = null;
   if ('geolocation' in navigator) {
-    watch = navigator.geolocation.watchPosition((p) => { fix = p.coords; $('cGps').textContent = `📍 Location found (within ${Math.round(p.coords.accuracy)} m)`; },
+    watch = navigator.geolocation.watchPosition((p) => { fix = p.coords; $('cGps').textContent = `Location found, within ${Math.round(p.coords.accuracy)} m`; },
       () => { $('cGps').textContent = 'No location (allow location access to add GPS). You can still save it.'; },
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 60000 });
   } else $('cGps').textContent = 'This phone can\'t share location. You can still save it.';
@@ -181,7 +187,7 @@ $('cNo').onclick = closeConfirm;
 
 /* ---------- sync ---------- */
 let syncing = false; let syncMsg = '';
-const VERSION = 'v18';
+const VERSION = 'v19';
 async function sync(manual) {
   updateNet();
   if (!navigator.onLine) { if (manual) toast('No signal right now. Your ticks are safe on this phone.'); return; }
@@ -222,8 +228,8 @@ async function pull() {
 function parse(text) { const rows = []; let row = []; let cell = ''; let q = false; for (let i = 0; i < text.length; i++) { const c = text[i]; if (q) { if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c; } else if (c === '"') q = true; else if (c === ',') { row.push(cell); cell = ''; } else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; } else if (c !== '\r') cell += c; } if (cell || row.length) { row.push(cell); rows.push(row); } return rows; }
 function updateNet() {
   const on = navigator.onLine; $('dot').classList.toggle('off', !on);
-  const w = queue.length ? ` · ${queue.length} waiting to sync` : '';
-  $('net').textContent = (on ? 'Online' : 'No signal, saving on this phone') + w + (on && queue.length && syncMsg ? ` · ${syncMsg}` : '');
+  const w = queue.length ? `, ${queue.length} waiting to sync` : '';
+  $('net').textContent = (on ? 'Online' : 'No signal, saving on this phone') + w + (on && queue.length && syncMsg ? `. ${syncMsg}` : '');
   $('syncBtn').hidden = !on;
 }
 $('syncBtn').onclick = () => sync(true);
@@ -244,7 +250,7 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catc
 // Ask the phone not to clear this app's saved ticks when space runs low
 const keepStorage = () => { try { if (navigator.storage && navigator.storage.persist) navigator.storage.persisted().then((ok) => { if (!ok) navigator.storage.persist(); }).catch(() => {}); } catch (e) {} };
 keepStorage();
-$('ver').textContent = VERSION; setHH(); render(); sync();
+$('ver').textContent = 'Version ' + VERSION.slice(1) + '.'; setHH(); render(); sync();
 </script>
 </body>
 </html>
