@@ -41,7 +41,7 @@
   const sw = el('button'); sw.type = 'button'; sw.append(icon('user'), 'Switch person');
   const out = el('button'); out.type = 'button'; out.append(icon('lock'), 'Log out');
   links.append(sw, out);
-  drawer.append(head, links, el('div', 'sx-ver', 'Works without signal. Version 19.'));
+  drawer.append(head, links, el('div', 'sx-ver', 'Works without signal. Version 20.'));
   document.body.append(shade, drawer);
   const openMenu = (o) => { drawer.classList.toggle('open', o); shade.classList.toggle('open', o); };
   burger.onclick = () => openMenu(true); shade.onclick = () => openMenu(false);

@@ -1,9 +1,9 @@
 // Safari Live works without signal: every page, font and script is stored on the phone
 // and served from there first, then refreshed quietly in the background.
-const CACHE = 'safari-v19';
+const CACHE = 'safari-v20';
 const TILES = 'safari-tiles';
 const SHELL = ['./', 'index.html', 'tick.html', 'comp.html', 'help.html', 'app.css', 'common.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png',
-  'fonts/barlow-400.woff2', 'fonts/barlow-500.woff2', 'fonts/barlow-600.woff2', 'fonts/barlow-700.woff2', 'fonts/barlowc-600.woff2', 'fonts/barlowc-700.woff2',
+  'fonts/inter-400.woff2', 'fonts/inter-500.woff2', 'fonts/inter-600.woff2', 'fonts/inter-700.woff2', 'fonts/dmserif.woff2',
   'vendor/leaflet.js', 'vendor/leaflet.css'];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE && k !== TILES).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });

@@ -7,67 +7,105 @@
 <meta name="description" content="Live sightings from our Kruger trip">
 <link rel="icon" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#132A1E">
+<meta name="theme-color" content="#2A1A10">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="preload" href="fonts/barlowc-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/dmserif.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="app.css">
 <link rel="stylesheet" href="vendor/leaflet.css">
 <script src="vendor/leaflet.js" defer></script>
 <style>
-/* ---------- hero: the sky over the bush, on South African time ---------- */
-.hero{position:relative;overflow:hidden;height:380px;color:#fff;transition:background 2s}
-.hero[data-sky=dawn]{background:linear-gradient(180deg,#5F73AE 0%,#E3A09C 42%,#F4C56E 78%,#F0A654 100%)}
-.hero[data-sky=day]{background:linear-gradient(180deg,#3A88C9 0%,#7DB9E6 52%,#D9EAF0 86%,#EEE7C4 100%)}
-.hero[data-sky=dusk]{background:linear-gradient(180deg,#44356F 0%,#C8576A 40%,#F0994A 72%,#F4C56E 100%)}
-.hero[data-sky=night]{background:linear-gradient(180deg,#060A1C 0%,#111D44 58%,#22324A 100%)}
-.hero[data-sky=day] .hero-in{color:#10283C}
-.hero-in{position:relative;z-index:5;max-width:1080px;margin:0 auto;padding:26px 16px 0}
-.hero h1{font-size:64px;line-height:.92;text-shadow:0 2px 14px rgba(0,0,0,.18)}
-.take{margin:10px 0 0;max-width:30rem;font-size:17px;font-weight:500}
+/* ---------- hero: a living bushveld scene on South African time ---------- */
+.hero{position:relative;overflow:hidden;height:420px;color:#FFF8EC;transition:background 2s;--far:rgba(140,59,30,.38);--mid:rgba(92,40,20,.7);--sy:0}
+.hero[data-sky=dawn]{background:linear-gradient(180deg,#6E7FB8 0%,#E9A3A0 40%,#F6C46B 75%,#F3A64F 100%);--far:rgba(120,90,130,.4);--mid:rgba(96,58,60,.72)}
+.hero[data-sky=day]{background:linear-gradient(180deg,#3E8ED0 0%,#7DB9E6 50%,#D7E9F2 85%,#F1E2C0 100%);--far:rgba(98,128,104,.5);--mid:rgba(82,84,52,.8)}
+.hero[data-sky=dusk]{background:linear-gradient(180deg,#F6C46B 0%,#E0892F 45%,#8C3B1E 100%)}
+.hero[data-sky=night]{background:linear-gradient(180deg,#070B1F 0%,#13204A 55%,#2C2850 100%);--far:rgba(20,26,58,.7);--mid:rgba(14,16,36,.85)}
+.hero[data-sky=day] .hero-in{color:#16324A}
+.hero-in{position:relative;z-index:8;max-width:1080px;margin:0 auto;padding:26px 16px 0}
+.hero h1{font-size:50px;line-height:1;text-shadow:0 2px 14px rgba(0,0,0,.18)}
+.take{margin:10px 0 0;max-width:30rem;font-size:16px;font-weight:500}
 .take b{font-weight:700}
 .hero-act{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:14px}
-.tickbtn{display:inline-block;padding:11px 18px;border-radius:8px;background:var(--sign);color:var(--sign-ink);font-weight:700;font-size:16px;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.2)}
-.clock{font-size:14px;font-weight:600}
-.orb{position:absolute;border-radius:50%;z-index:1}
-.sun{width:90px;height:90px;background:radial-gradient(circle,#FFF6D6 0%,#FFD976 45%,rgba(255,200,90,0) 70%)}
-.moon{width:54px;height:54px;background:#F4F1E6;box-shadow:0 0 40px 10px rgba(244,241,230,.25)}
-.moon::after{content:"";position:absolute;inset:-4px -14px 4px 14px;border-radius:50%;background:#111D44;opacity:.9}
+.tickbtn{display:inline-block;padding:10px 18px;border-radius:24px;background:#FFF8EC;color:#8C3B1E;font-weight:700;font-size:15px;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.clock{font-size:13px;font-weight:600;padding:5px 12px;border-radius:20px;background:rgba(255,255,255,.2);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.layer{position:absolute;left:0;width:100%;will-change:transform}
+/* sun and moon */
+.orb{position:absolute;border-radius:50%;z-index:1;translate:-50% -50%;transform:translateY(calc(var(--sy)*.35px));transition:left 2s,top 2s}
+.sun{width:76px;height:76px;background:radial-gradient(circle,#FFFDF0 0 34%,#FFE590 58%,#FFCB52 100%);box-shadow:0 0 44px 18px rgba(255,220,130,.6),0 0 130px 70px rgba(255,196,96,.3);animation:glow 5s ease-in-out infinite}
+.sun.low{width:104px;height:104px;background:radial-gradient(circle,#FFF3C4 0 30%,#FFC255 60%,#F78F3A 100%);box-shadow:0 0 60px 26px rgba(255,170,80,.6),0 0 180px 90px rgba(255,140,60,.32)}
+.sun::before{content:"";position:absolute;inset:-110px;border-radius:50%;background:repeating-conic-gradient(rgba(255,238,180,.2) 0 5deg,transparent 5deg 20deg);-webkit-mask:radial-gradient(circle,transparent 24%,#000 30%,transparent 66%);mask:radial-gradient(circle,transparent 24%,#000 30%,transparent 66%);animation:spin 80s linear infinite}
+@keyframes glow{50%{filter:brightness(1.08);scale:1.04}}
+@keyframes spin{to{rotate:360deg}}
+.moon{width:56px;height:56px;background:radial-gradient(circle at 35% 35%,#FFFEF4,#E4E0CF);box-shadow:0 0 50px 14px rgba(244,241,230,.28)}
+.moon::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 62% 30%,rgba(120,116,100,.35) 0 9%,transparent 10%),radial-gradient(circle at 34% 62%,rgba(120,116,100,.3) 0 13%,transparent 14%),radial-gradient(circle at 68% 68%,rgba(120,116,100,.25) 0 7%,transparent 8%)}
 .stars{position:absolute;inset:0;z-index:0}
 .stars i{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;animation:tw 3s ease-in-out infinite}
-@keyframes tw{50%{opacity:.25}}
-.cloud{position:absolute;z-index:2;height:28px;border-radius:30px;background:rgba(255,255,255,.55);filter:blur(2px);animation:drift linear infinite}
+@keyframes tw{50%{opacity:.2}}
+.shoot{position:absolute;top:12%;left:70%;width:90px;height:2px;border-radius:2px;background:linear-gradient(90deg,#fff,transparent);opacity:0;rotate:-24deg;animation:shoot 11s ease-in 3s infinite}
+@keyframes shoot{0%{opacity:0;translate:0 0}2%{opacity:1}9%{opacity:0;translate:-260px 116px}100%{opacity:0;translate:-260px 116px}}
+.fly{position:absolute;width:4px;height:4px;border-radius:50%;background:#F7E27A;box-shadow:0 0 8px 3px rgba(247,226,122,.7);z-index:6;animation:ff 5s ease-in-out infinite}
+@keyframes ff{0%,100%{opacity:0;translate:0 0}30%{opacity:1}50%{translate:14px -18px}70%{opacity:.9}85%{opacity:0;translate:-8px -30px}}
+/* clouds and birds */
+.cloud{position:absolute;z-index:2;height:26px;border-radius:30px;background:rgba(255,255,255,.7);filter:blur(1.5px);animation:drift linear infinite}
 .cloud::before,.cloud::after{content:"";position:absolute;background:inherit;border-radius:50%}
-.cloud::before{width:50%;height:200%;left:15%;top:-90%}.cloud::after{width:35%;height:160%;right:15%;top:-60%}
-@keyframes drift{from{transform:translateX(-30vw)}to{transform:translateX(130vw)}}
-.bird{position:absolute;z-index:3;width:22px;height:10px;animation:fly linear infinite}
-.bird svg{width:100%;height:100%;animation:flap .5s ease-in-out infinite alternate}
-@keyframes fly{from{transform:translateX(-10vw)}to{transform:translateX(110vw)}}
-@keyframes flap{to{transform:scaleY(.4)}}
-.ground{position:absolute;left:0;bottom:0;width:100%;height:110px;z-index:3}
-.walker{position:absolute;bottom:26px;z-index:4;animation:walk linear infinite}
+.cloud::before{width:46%;height:210%;left:16%;top:-100%}.cloud::after{width:36%;height:160%;right:14%;top:-58%}
+@keyframes drift{from{transform:translateX(-40vw)}to{transform:translateX(130vw)}}
+.flock{position:absolute;z-index:3;width:120px;height:60px;animation:fly 46s linear infinite}
+.flock div{position:absolute;animation:soar 3.4s ease-in-out infinite alternate}
+.flock svg{display:block;width:20px;height:9px;animation:flap .42s ease-in-out infinite alternate}
+@keyframes fly{from{transform:translate(-140px,30px)}to{transform:translate(calc(100vw + 40px),-40px)}}
+@keyframes soar{to{translate:0 5px}}
+@keyframes flap{to{transform:scaleY(.25)}}
+/* land */
+.far{bottom:44px;height:170px;z-index:2;transform:translateY(calc(var(--sy)*.22px))}
+.mid{bottom:34px;height:130px;z-index:3;transform:translateY(calc(var(--sy)*.12px))}
+.far path{fill:var(--far)}.mid path{fill:var(--mid)}
+.ground{bottom:0;height:62px;z-index:4}
+.tree{position:absolute;z-index:4;transform-origin:50% 100%;animation:breeze 7s ease-in-out infinite alternate}
+.tree.t1{left:4%;bottom:40px;width:190px}
+.tree.t2{right:-2%;bottom:44px;width:130px;animation-duration:9s}
+.tree.t3{left:56%;bottom:58px;width:64px;opacity:.7;z-index:3;animation-duration:8s}
+@keyframes breeze{from{transform:rotate(-.7deg)}to{transform:rotate(.7deg)}}
+.grass{position:absolute;left:-24px;right:-24px;bottom:-2px;height:24px;z-index:6;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 24'%3E%3Cpath fill='%232A170C' d='M2 24l3-16 3 16zM10 24l7-22 2 22zM22 24l2-14 4 14zM30 24l7-19 2 19zM42 24l2-12 4 12zM50 24l6-21 2 21zM59 24l3-13 2 13z'/%3E%3C/svg%3E") repeat-x bottom/64px 24px;transform-origin:50% 100%;animation:sway 3.6s ease-in-out infinite alternate}
+.grass.rear{bottom:30px;height:16px;z-index:4;background-size:44px 16px;opacity:.85;animation-duration:5s;animation-delay:-2s}
+@keyframes sway{from{transform:skewX(-7deg)}to{transform:skewX(7deg)}}
+/* animals */
+.walker{position:absolute;bottom:30px;left:0;z-index:5;display:flex;align-items:flex-end;gap:10px;animation:walk linear infinite}
 .walker svg{display:block;animation:bob 1.2s ease-in-out infinite}
-@keyframes walk{from{transform:translateX(-160px)}to{transform:translateX(calc(100vw + 40px))}}
+.walker .calf{animation-duration:.8s}
+@keyframes walk{from{transform:translateX(-260px)}to{transform:translateX(calc(100vw + 40px))}}
 @keyframes bob{50%{transform:translateY(-1.5px)}}
 .walker .lgA,.walker .lgB{transform-box:fill-box;transform-origin:50% 0;animation:swing 1.2s ease-in-out infinite alternate}
 .walker .lgB{animation-direction:alternate-reverse}
-@keyframes swing{from{transform:rotate(-7deg)}to{transform:rotate(7deg)}}
-@media (prefers-reduced-motion:reduce){.walker{left:60%}}
+.walker .calf .lgA,.walker .calf .lgB{animation-duration:.8s}
+@keyframes swing{from{transform:rotate(-9deg)}to{transform:rotate(9deg)}}
+.walker .tail,.walker .trunk,.walker .ear,.walker .neck{transform-box:fill-box;animation:wag 1.6s ease-in-out infinite alternate}
+.walker .tail{transform-origin:80% 0}
+.walker .trunk{transform-origin:20% 0;animation-duration:2.6s}
+.walker .ear{transform-origin:100% 30%;animation-name:flapear;animation-duration:2.2s}
+.walker .neck{transform-origin:10% 100%;animation-name:nod;animation-duration:1.2s}
+@keyframes wag{from{transform:rotate(-9deg)}to{transform:rotate(9deg)}}
+@keyframes flapear{0%,60%{transform:scaleX(1)}100%{transform:scaleX(.72)}}
+@keyframes nod{from{transform:rotate(-1.6deg)}to{transform:rotate(1.6deg)}}
+.hero[data-sky=night] .walker,.hero[data-sky=night] .ground,.hero[data-sky=night] .tree,.hero[data-sky=night] .grass{filter:brightness(.45)}
+@media (prefers-reduced-motion:reduce){.walker{left:55%}.walker+.walker{left:12%}}
+@media (max-width:560px){.hero{height:400px}.hero h1{font-size:42px}.tree.t1{width:150px}.tree.t2{width:104px}}
 
 /* ---------- layout ---------- */
 .wrap{max-width:1080px;margin:0 auto;padding:0 16px calc(48px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:36px}
-.sec h2{font-size:32px}
+.sec h2{font-size:28px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:36px 28px}
 .foot{font-size:13px;color:var(--muted);text-align:center;margin:0}
 .skel{display:inline-block;width:2ch;height:.7em;border-radius:3px;background:rgba(255,255,255,.2)}
 
-/* ---------- totals: a road distance board ---------- */
-.stats{margin-top:-28px;position:relative;z-index:6;padding:8px 20px;display:grid}
-.stats div{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid rgba(243,243,230,.22)}
+/* ---------- totals ---------- */
+.stats{margin-top:18px;position:relative;z-index:6;padding:8px 20px;display:grid}
+.stats div{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid rgba(255,248,236,.25)}
 .stats div:first-child{border-top:0}
-.stats span{font-family:var(--display);font-weight:600;font-size:24px}
-.stats b{font-family:var(--display);font-weight:700;font-size:34px;line-height:1;color:var(--sign);font-variant-numeric:tabular-nums}
+.stats span{font-size:16px;font-weight:600}
+.stats b{font-family:var(--display);font-size:34px;line-height:1;color:#fff;font-variant-numeric:tabular-nums}
 .stats small{font-size:20px;color:var(--on-board-muted);font-weight:600}
-@media (min-width:720px){.stats{grid-template-columns:repeat(4,1fr);padding:14px 8px}.stats div{flex-direction:column-reverse;align-items:center;gap:4px;border-top:0;border-left:1px solid rgba(243,243,230,.22);padding:4px 0}.stats div:first-child{border-left:0}.stats b{font-size:48px}}
+@media (min-width:720px){.stats{grid-template-columns:repeat(4,1fr);padding:14px 8px}.stats div{flex-direction:column-reverse;align-items:center;gap:4px;border-top:0;border-left:1px solid rgba(255,248,236,.25);padding:4px 0}.stats div:first-child{border-left:0}.stats b{font-size:48px}}
 
 /* ---------- big five plates ---------- */
 .b5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
@@ -76,11 +114,11 @@
 .b5in{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.2,.8,.2,1)}
 .b5card.on .b5in{transform:rotateY(180deg)}
 .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 6px;text-align:center}
-.front{border:2px dashed var(--line);color:var(--muted)}
+.front{border:2px dashed #C9B38A;color:var(--muted)}
 .front svg{width:78px;height:52px;fill:currentColor;opacity:.45}
-.back{transform:rotateY(180deg);background:var(--sign);color:var(--sign-ink);box-shadow:inset 0 0 0 2px var(--sign),inset 0 0 0 4px var(--sign-ink)}
-.back svg{width:78px;height:52px;fill:var(--sign-ink)}
-.b5name{font-family:var(--display);font-weight:700;font-size:22px;line-height:1}
+.back{transform:rotateY(180deg);background:linear-gradient(135deg,#F7D774 0%,#E8B53C 45%,#C98E1E 100%);color:var(--gold-ink);box-shadow:0 6px 18px rgba(201,142,30,.35)}
+.back svg{width:78px;height:52px;fill:var(--gold-ink)}
+.b5name{font-family:var(--display);font-size:19px;line-height:1.1}
 .b5sub{font-size:12px;line-height:1.25}
 .b5sub b{display:block;font-size:14px}
 
@@ -91,26 +129,26 @@
 .entry:first-child{border-top:0}
 .entry .at{font-size:13px;color:var(--muted);line-height:1.25}
 .entry .at b{display:block;font-family:var(--display);font-size:22px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
-.entry h3{font-size:23px;font-weight:600}
+.entry h3{font-size:21px;color:var(--bush)}
 .entry .by{font-size:14px;color:var(--muted);margin-top:2px}
 .entry .by b{color:var(--ink);font-weight:600}
-.entry.is-new{background:linear-gradient(90deg,var(--sign) 0 5px,transparent 5px)}
-.newtag{font-size:12px;font-weight:700;color:var(--sign-ink);background:var(--sign);border-radius:4px;padding:1px 6px;margin-left:8px;vertical-align:3px;font-family:var(--body)}
+.entry.is-new{background:linear-gradient(90deg,var(--gold) 0 5px,transparent 5px)}
+.newtag{font-size:12px;font-weight:700;color:var(--gold-ink);background:var(--gold);border-radius:4px;padding:1px 6px;margin-left:8px;vertical-align:3px;font-family:var(--body)}
 .maplink{font-weight:600;text-decoration:none;margin-left:8px}
 @media (max-width:420px){.entry{grid-template-columns:3.2rem 1fr}.entry .rar{grid-column:2;margin-top:-6px}}
 
 /* ---------- rare alert ---------- */
-.alert{position:fixed;top:calc(var(--navh,56px) + 10px);left:50%;z-index:65;width:min(92vw,520px);transform:translate(-50%,calc(-100% - var(--navh,56px) - 30px));opacity:0;visibility:hidden;pointer-events:none;transition:transform .6s cubic-bezier(.2,1.2,.4,1),opacity .3s,visibility 0s .6s;background:var(--sign);color:var(--sign-ink);border-radius:10px;padding:14px 50px 16px 18px;box-shadow:inset 0 0 0 2px var(--sign),inset 0 0 0 4px var(--sign-ink),0 14px 40px rgba(0,0,0,.35)}
+.alert{position:fixed;top:calc(var(--navh,56px) + 10px);left:50%;z-index:65;width:min(92vw,520px);transform:translate(-50%,calc(-100% - var(--navh,56px) - 30px));opacity:0;visibility:hidden;pointer-events:none;transition:transform .6s cubic-bezier(.2,1.2,.4,1),opacity .3s,visibility 0s .6s;background:linear-gradient(135deg,#8C3B1E,#C8742B);color:#FFF8EC;border-radius:16px;padding:14px 50px 16px 18px;box-shadow:0 14px 40px rgba(0,0,0,.35)}
 .alert.show{transform:translate(-50%,0);opacity:1;visibility:visible;pointer-events:auto;transition:transform .6s cubic-bezier(.2,1.2,.4,1),opacity .3s,visibility 0s}
 .alert .k{font-size:14px;font-weight:700}
-.alert .t{font-family:var(--display);font-weight:700;font-size:30px;line-height:1.05;margin-top:2px}
-.alert button{position:absolute;top:12px;right:12px;border:0;background:var(--sign-ink);color:var(--sign);width:32px;height:32px;border-radius:50%;font-size:18px;line-height:1}
+.alert .t{font-family:var(--display);font-size:30px;line-height:1.05;margin-top:2px}
+.alert button{position:absolute;top:12px;right:12px;border:0;background:rgba(255,255,255,.22);color:#fff;width:32px;height:32px;border-radius:50%;font-size:18px;line-height:1}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:49}
 
 /* ---------- map ---------- */
 #map{height:380px;border-radius:10px;overflow:hidden;border:1px solid var(--line);z-index:0;background:var(--sunk)}
 .leaflet-container{font-family:var(--body)}
-.leaflet-popup-content{font-size:14px;color:#15241B}
+.leaflet-popup-content{font-size:14px;color:#3E2723}
 .leaflet-popup-content b{font-family:var(--display);font-size:22px}
 
 /* ---------- spotters ---------- */
@@ -119,8 +157,9 @@
 .pod{display:flex;flex-direction:column;align-items:center;gap:2px}
 .pod .who{font-family:var(--display);font-size:28px;font-weight:700;line-height:1}
 .pod .cnt{font-size:13px;color:var(--muted);margin-bottom:6px}
-.pod .blk{width:100%;border-radius:8px 8px 0 0;display:flex;align-items:flex-start;justify-content:center;padding-top:8px;font-family:var(--display);font-weight:700;font-size:38px;line-height:1;background:var(--board);color:var(--on-board);transform-origin:bottom;animation:rise .8s cubic-bezier(.2,.8,.2,1) both}
-.pod.p1 .blk{height:116px;background:var(--sign);color:var(--sign-ink)}
+.pod .blk{width:100%;border-radius:12px 8px 0 0;display:flex;align-items:flex-start;justify-content:center;padding-top:8px;font-family:var(--display);font-size:38px;line-height:1;color:#3E2723;transform-origin:bottom;animation:rise .8s cubic-bezier(.2,.8,.2,1) both}
+.pod.p1 .blk{height:116px;background:linear-gradient(180deg,#F7D774,#C98E1E)}
+.pod.p2 .blk{background:linear-gradient(180deg,#E9E9E9,#A8A8A8)}.pod.p3 .blk{background:linear-gradient(180deg,#F0B98A,#B7743F)}
 .pod.p2 .blk{height:84px;animation-delay:.12s}
 .pod.p3 .blk{height:60px;animation-delay:.24s}
 @keyframes rise{from{transform:scaleY(0)}to{transform:scaleY(1)}}
@@ -136,8 +175,7 @@
 .fill{height:100%;border-radius:3px;transition:width .8s ease}
 .bar .n{text-align:right;color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
 .cols{display:flex;align-items:flex-end;gap:6px;height:160px;padding-top:22px;border-bottom:2px solid var(--ink)}
-.col{flex:1;max-width:40px;border-radius:3px 3px 0 0;min-height:2px;position:relative;background:var(--board)}
-@media (prefers-color-scheme:dark){.col{background:var(--sign)}}
+.col{flex:1;max-width:40px;border-radius:6px 6px 0 0;min-height:2px;position:relative;background:#E0892F}
 .col span{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600}
 .days{display:flex;gap:6px;margin-top:6px}
 .days span{flex:1;max-width:40px;text-align:center;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden}
@@ -152,42 +190,49 @@
   <div class="hero-in">
     <h1>Safari Live</h1>
     <p class="take" id="take">Loading the latest sightings…</p>
-    <div class="hero-act"><a class="tickbtn" href="tick.html">Log a sighting</a><span class="clock" id="clock"></span></div>
+    <div class="hero-act"><a class="tickbtn" href="tick.html">+ Log a sighting</a><span class="clock" id="clock"></span></div>
   </div>
-  <svg class="ground" viewBox="0 0 1200 110" preserveAspectRatio="none" aria-hidden="true">
-    <path d="M0 78 Q150 64 300 74 T600 70 T900 76 T1200 68 V110 H0Z" fill="#14231A"/>
-    <g fill="#14231A">
-      <rect x="186" y="34" width="6" height="62"/><ellipse cx="189" cy="32" rx="62" ry="10"/><ellipse cx="170" cy="26" rx="30" ry="7"/><ellipse cx="212" cy="27" rx="28" ry="6"/>
-      <rect x="985" y="44" width="5" height="52"/><ellipse cx="987" cy="42" rx="46" ry="8"/><ellipse cx="1005" cy="37" rx="22" ry="5"/>
-      <path d="M520 74 q20-22 40 0z"/><path d="M760 72 q12-14 24 0z"/>
-    </g>
-  </svg>
-  <div class="walker" style="animation-duration:95s" aria-hidden="true">
-    <svg width="78" height="104" viewBox="0 0 120 160" fill="#14231A">
+  <svg class="layer far" viewBox="0 0 1200 170" preserveAspectRatio="none" aria-hidden="true"><path d="M0 104C150 50 260 82 380 62 520 38 600 92 760 76 900 62 1000 22 1200 68V170H0Z"/></svg>
+  <svg class="layer mid" viewBox="0 0 1200 130" preserveAspectRatio="none" aria-hidden="true"><path d="M0 92C120 74 200 46 300 56c80 8 120-30 170-34s70 34 150 44c140 16 240-30 340-22s160 38 240 30V130H0Z"/></svg>
+  <svg class="tree t3" viewBox="0 0 200 150" fill="#3B2416" aria-hidden="true"><path d="M95 150C98 122 93 100 84 78L58 52l5-4 27 24c4-12 6-22 6-32h7c0 15 1 26 5 34l28-26 5 4-27 28c-6 20-8 44-6 70z"/><ellipse cx="100" cy="38" rx="94" ry="13"/><ellipse cx="58" cy="29" rx="46" ry="10"/><ellipse cx="142" cy="28" rx="50" ry="10"/><ellipse cx="100" cy="20" rx="54" ry="9"/></svg>
+  <div class="grass rear"></div>
+  <svg class="tree t1" viewBox="0 0 200 150" fill="#3B2416" aria-hidden="true"><path d="M95 150C98 122 93 100 84 78L58 52l5-4 27 24c4-12 6-22 6-32h7c0 15 1 26 5 34l28-26 5 4-27 28c-6 20-8 44-6 70z"/><ellipse cx="100" cy="38" rx="94" ry="13"/><ellipse cx="58" cy="29" rx="46" ry="10"/><ellipse cx="142" cy="28" rx="50" ry="10"/><ellipse cx="100" cy="20" rx="54" ry="9"/></svg>
+  <svg class="tree t2" viewBox="0 0 200 150" fill="#3B2416" aria-hidden="true"><path d="M95 150C98 122 93 100 84 78L58 52l5-4 27 24c4-12 6-22 6-32h7c0 15 1 26 5 34l28-26 5 4-27 28c-6 20-8 44-6 70z"/><ellipse cx="100" cy="38" rx="94" ry="13"/><ellipse cx="58" cy="29" rx="46" ry="10"/><ellipse cx="142" cy="28" rx="50" ry="10"/><ellipse cx="100" cy="20" rx="54" ry="9"/></svg>
+  <svg class="layer ground" viewBox="0 0 1200 62" preserveAspectRatio="none" aria-hidden="true"><path d="M0 22Q150 8 300 18T600 14T900 20T1200 12V62H0Z" fill="#3B2416"/></svg>
+  <div class="walker" style="animation-duration:90s;animation-delay:-62s" aria-hidden="true">
+<svg width="78" height="104" viewBox="0 0 120 160" fill="#3B2416">
   <g class="lgB"><path d="M38 96 Q36 112 37 126 Q38 140 37 154 L41 155 Q42 140 41 126 Q42 112 43 98 Z"/><path d="M84 92 Q85 110 85 126 Q85 140 85 154 L89 155 Q89 140 89 126 Q90 110 90 92 Z"/></g>
   <g class="lgA"><path d="M46 96 Q46 112 47 126 Q49 140 48 154 L52 155 Q53 140 51 126 Q51 112 52 98 Z"/><path d="M76 94 Q77 110 77 126 Q77 140 76 154 L80 155 Q81 140 81 126 Q82 110 82 94 Z"/></g>
   <path d="M30 90 C28 80 34 74 46 72 C56 70 66 67 76 62 C86 58 94 62 96 72 C98 84 92 94 82 96 C70 98 54 100 42 100 C34 100 31 96 30 90 Z"/>
-  <path d="M78 66 C82 52 88 36 94 22 C96 18 100 16 102 18 C106 22 104 30 102 36 C98 48 96 60 94 74 C90 74 84 72 78 66 Z"/>
+  <g class="neck"><path d="M78 66 C82 52 88 36 94 22 C96 18 100 16 102 18 C106 22 104 30 102 36 C98 48 96 60 94 74 C90 74 84 72 78 66 Z"/>
   <path d="M93 22 C92 14 98 9 106 10 C111 10 116 13 118 17 C119 20 117 22 114 22 C110 22 107 23 104 26 C100 28 95 27 93 22 Z"/>
   <rect x="97" y="3" width="2.2" height="9" rx="1"/><circle cx="98.1" cy="3" r="2"/><rect x="101.5" y="2" width="2.2" height="9" rx="1"/><circle cx="102.6" cy="2" r="2"/>
-  <path d="M95 14 L88 10 L92 17 Z"/>
-  <path d="M31 84 C26 94 25 106 27 116 L29.5 116 C28.5 106 30 96 34 86 Z"/><ellipse cx="28.2" cy="119" rx="2.6" ry="4.5"/>
-  <path d="M84 60 C88 46 93 32 98 20" stroke="#14231A" stroke-width="2.4" fill="none" stroke-dasharray="2 1.6" opacity=".9" transform="translate(-3 1)"/>
+  <path d="M95 14 L88 10 L92 17 Z"/></g>
+  <g class="tail"><path d="M31 84 C26 94 25 106 27 116 L29.5 116 C28.5 106 30 96 34 86 Z"/><ellipse cx="28.2" cy="119" rx="2.6" ry="4.5"/></g>
 </svg>
   </div>
-  <div class="walker" style="animation-duration:140s;animation-delay:-60s" aria-hidden="true">
-    <svg width="120" height="83" viewBox="0 0 160 110" fill="#14231A">
+  <div class="walker" style="animation-duration:130s;animation-delay:-45s" aria-hidden="true">
+<svg class="calf" width="58" height="40" viewBox="0 0 160 110" fill="#3B2416">
   <g class="lgB"><path d="M30 64 L28 104 Q34 107 42 104 L44 66 Z"/><path d="M98 64 L96 104 Q102 107 110 104 L110 64 Z"/></g>
   <g class="lgA"><path d="M48 66 L48 104 Q54 107 62 104 L62 66 Z"/><path d="M82 66 L82 104 Q88 107 96 104 L94 66 Z"/></g>
   <path d="M18 52 C16 30 36 16 66 15 C92 14 110 20 118 34 C124 46 122 62 114 70 C100 76 50 76 30 72 C22 68 19 62 18 52 Z"/>
   <path d="M110 32 C112 20 124 13 136 16 C146 19 150 30 148 42 C147 50 144 56 140 60 L128 62 C118 60 112 50 110 32 Z"/>
-  <path d="M140 48 C146 58 150 72 148 86 C147 96 142 102 136 100 C134 99 134 96 136 94 C140 88 140 76 136 66 C134 60 132 56 132 52 Z"/>
-  <path d="M117 26 C106 28 100 40 102 54 C104 64 112 70 120 66 C126 62 128 52 127 42 C126 32 123 26 117 26 Z" fill="#24382C"/>
-  <path d="M133 60 C138 66 146 68 154 64 L154 66.5 C147 72 138 71 132 65 Z" fill="#F3F3E6"/>
-  <circle cx="137" cy="36" r="1.4" fill="#F3F3E6"/>
-  <path d="M18 46 C12 52 10 62 11 70 L13.5 70 C13 62 15 54 20 49 Z"/>
+  <path class="trunk" d="M140 48 C146 58 150 72 148 86 C147 96 142 102 136 100 C134 99 134 96 136 94 C140 88 140 76 136 66 C134 60 132 56 132 52 Z"/>
+  <path class="ear" d="M117 26 C106 28 100 40 102 54 C104 64 112 70 120 66 C126 62 128 52 127 42 C126 32 123 26 117 26 Z" fill="#5A3A26"/>
+  <circle cx="137" cy="36" r="1.4" fill="#EADBC0"/>
+  <path class="tail" d="M18 46 C12 52 10 62 11 70 L13.5 70 C13 62 15 54 20 49 Z"/>
+</svg><svg class="" width="120" height="83" viewBox="0 0 160 110" fill="#3B2416">
+  <g class="lgB"><path d="M30 64 L28 104 Q34 107 42 104 L44 66 Z"/><path d="M98 64 L96 104 Q102 107 110 104 L110 64 Z"/></g>
+  <g class="lgA"><path d="M48 66 L48 104 Q54 107 62 104 L62 66 Z"/><path d="M82 66 L82 104 Q88 107 96 104 L94 66 Z"/></g>
+  <path d="M18 52 C16 30 36 16 66 15 C92 14 110 20 118 34 C124 46 122 62 114 70 C100 76 50 76 30 72 C22 68 19 62 18 52 Z"/>
+  <path d="M110 32 C112 20 124 13 136 16 C146 19 150 30 148 42 C147 50 144 56 140 60 L128 62 C118 60 112 50 110 32 Z"/>
+  <path class="trunk" d="M140 48 C146 58 150 72 148 86 C147 96 142 102 136 100 C134 99 134 96 136 94 C140 88 140 76 136 66 C134 60 132 56 132 52 Z"/>
+  <path class="ear" d="M117 26 C106 28 100 40 102 54 C104 64 112 70 120 66 C126 62 128 52 127 42 C126 32 123 26 117 26 Z" fill="#5A3A26"/>
+  <path d="M133 60 C138 66 146 68 154 64 L154 66.5 C147 72 138 71 132 65 Z" fill="#EADBC0"/><circle cx="137" cy="36" r="1.4" fill="#EADBC0"/>
+  <path class="tail" d="M18 46 C12 52 10 62 11 70 L13.5 70 C13 62 15 54 20 49 Z"/>
 </svg>
   </div>
+  <div class="grass"></div>
 </header>
 
 <div class="alert" id="alert" role="status" aria-live="polite">
@@ -207,7 +252,7 @@
 
   <section class="sec" id="big-five">
     <h2>The Big Five</h2>
-    <p class="note">Each plate flips to yellow the moment someone logs it.</p>
+    <p class="note">Each badge flips to gold the moment someone logs it.</p>
     <div class="b5" id="big5"></div>
   </section>
 
@@ -263,22 +308,34 @@ const store = { get(k) { try { return localStorage.getItem(k); } catch { return 
 /* ---------- sky ---------- */
 const saHour = () => { const p = params.get('hour'); if (p) return +p; return +new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hour12: false, timeZone: 'Africa/Johannesburg' }).format(new Date()); };
 function sky() {
-  const h = saHour();
-  const phase = params.get('sky') || (h < 5 || h >= 20 ? 'night' : h < 7 ? 'dawn' : h < 17 ? 'day' : 'dusk');
+  const now = new Date(); const hp = params.get('hour');
+  const h = hp ? +hp : +new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hour12: false, timeZone: 'Africa/Johannesburg' }).format(now) + now.getMinutes() / 60;
+  const phase = params.get('sky') || (h < 5 || h >= 19.5 ? 'night' : h < 7 ? 'dawn' : h < 17 ? 'day' : 'dusk');
   const hero = $('hero'); hero.dataset.sky = phase;
-  const orb = $('orb'); orb.className = 'orb ' + (phase === 'night' ? 'moon' : 'sun');
-  const pos = { dawn: [12, 58], day: [72, 14], dusk: [80, 50], night: [78, 12] }[phase];
-  orb.style.left = pos[0] + '%'; orb.style.top = pos[1] + '%';
+  const orb = $('orb'); const night = phase === 'night';
+  // The sun follows the real time of day across the sky; the moon does the same through the night.
+  const t = night ? ((h + 24 - 19.5) % 24) / 9.5 : (h - 5) / 14.5;
+  const lift = Math.sin(Math.PI * Math.min(1, Math.max(0, t)));
+  orb.className = 'orb ' + (night ? 'moon' : 'sun' + (lift < 0.55 ? ' low' : ''));
+  orb.style.left = (night ? 62 + 30 * t : 26 + 62 * t) + '%'; orb.style.top = (night ? 52 - lift * 24 : 70 - lift * 52) + '%';
   const stars = $('stars'); stars.replaceChildren();
-  if (phase === 'night') for (let i = 0; i < 90; i++) { const s = el('i'); s.style.left = Math.random() * 100 + '%'; s.style.top = Math.random() * 70 + '%'; s.style.animationDelay = Math.random() * 3 + 's'; if (Math.random() < .2) { s.style.width = s.style.height = '3px'; } stars.appendChild(s); }
   const fx = $('sky-fx'); fx.replaceChildren();
-  if (phase !== 'night') {
-    [[12, 140, 70], [28, 90, 95], [6, 110, 120]].forEach(([top, w, dur], i) => { const c = el('div', 'cloud'); c.style.top = top + 8 + '%'; c.style.width = w + 'px'; c.style.animationDuration = dur + 's'; c.style.animationDelay = -i * 30 + 's'; if (phase === 'dusk') c.style.background = 'rgba(255,214,170,.45)'; fx.appendChild(c); });
-    [[22, 28], [26, 31], [19, 34]].forEach(([top, dur], i) => { const b = el('div', 'bird'); b.style.top = top + i * 2 + '%'; b.style.animationDuration = dur + 's'; b.style.animationDelay = -i * 1.2 + 's'; b.innerHTML = '<svg viewBox="0 0 22 10"><path d="M0 2 Q6 0 11 7 Q16 0 22 2 Q16 3 11 10 Q6 3 0 2Z" fill="#14231A"/></svg>'; fx.appendChild(b); });
+  if (night) {
+    for (let i = 0; i < 110; i++) { const s = el('i'); s.style.left = Math.random() * 100 + '%'; s.style.top = Math.random() * 68 + '%'; s.style.animationDelay = Math.random() * 3 + 's'; if (Math.random() < .18) { s.style.width = s.style.height = '3px'; } stars.appendChild(s); }
+    stars.appendChild(el('span', 'shoot'));
+    for (let i = 0; i < 9; i++) { const f = el('span', 'fly'); f.style.left = 6 + Math.random() * 88 + '%'; f.style.bottom = 24 + Math.random() * 70 + 'px'; f.style.animationDelay = -Math.random() * 5 + 's'; f.style.animationDuration = 4 + Math.random() * 3 + 's'; fx.appendChild(f); }
+  } else {
+    [[10, 150, 80, .75], [24, 96, 110, .5], [4, 120, 140, .6], [32, 70, 170, .4]].forEach(([top, w, dur, op], i) => { const c = el('div', 'cloud'); c.style.top = top + 6 + '%'; c.style.width = w + 'px'; c.style.height = w * .18 + 'px'; c.style.animationDuration = dur + 's'; c.style.animationDelay = -i * 37 - 10 + 's'; c.style.background = phase === 'day' ? `rgba(255,255,255,${op})` : `rgba(255,222,186,${op * .8})`; fx.appendChild(c); });
+    // a small flock in a V
+    const flock = el('div', 'flock'); flock.style.top = '52%'; flock.style.animationDelay = '-14s';
+    [[60, 0], [44, 10], [76, 10], [28, 21], [92, 21], [12, 33], [108, 33]].forEach(([x, y], i) => { const b = el('div'); b.style.left = x + 'px'; b.style.top = y + 'px'; b.style.animationDelay = -i * .5 + 's'; b.innerHTML = '<svg viewBox="0 0 22 10"><path d="M0 2 Q6 0 11 7 Q16 0 22 2 Q16 3 11 10 Q6 3 0 2Z" fill="#2B1B10"/></svg>'; b.firstChild.style.animationDelay = -i * .11 + 's'; flock.appendChild(b); });
+    fx.appendChild(flock);
   }
-  const label = { dawn: 'Sunrise in the bush', day: 'Midday on the savanna', dusk: 'Sundowner time', night: 'Night in the bush' }[phase];
-  $('clock').textContent = `${label}, ${new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Johannesburg' }).format(new Date())}`;
+  const label = { dawn: 'Sunrise', day: 'Daytime', dusk: 'Sundowner time', night: 'Night' }[phase];
+  $('clock').textContent = `${label}, ${new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Johannesburg' }).format(now)}`;
 }
+// gentle depth as you scroll: far hills and the sun move slower than the foreground
+let syT = false; addEventListener('scroll', () => { if (syT || scrollY > 500) return; syT = true; requestAnimationFrame(() => { $('hero').style.setProperty('--sy', scrollY); syT = false; }); }, { passive: true });
 
 /* ---------- data ---------- */
 function parseCSV(text) {
@@ -299,11 +356,11 @@ async function getCSV(url) { const res = await fetch(url + '&t=' + Date.now()); 
 
 /* ---------- big five art (simple silhouettes) ---------- */
 const ART = {
-  Lion: '<svg viewBox="0 0 120 80"><path d="M20 40 C20 32 28 28 40 28 L76 28 C84 28 88 34 88 42 C88 50 84 52 80 54 L80 74 L74 75 L73 56 L40 56 L38 74 L32 75 L31 55 C24 53 20 48 20 40 Z"/><path d="M22 36 C14 34 8 40 6 50 C5 56 7 60 10 58 C10 52 12 44 18 42 Z"/><ellipse cx="7.5" cy="60" rx="3.5" ry="4.5"/><path d="M78 30 C74 18 82 8 94 8 C106 8 114 16 114 28 C114 40 106 48 96 50 C86 50 80 42 78 30 Z"/><path d="M98 18 C104 16 112 20 113 28 C114 34 110 38 104 38 C98 38 94 32 94 26 C94 22 95 19 98 18 Z" fill="#3F5A48"/><circle cx="104" cy="25" r="1.4" fill="#F3F3E6"/><path d="M110 32 L114 33 L111 36 Z" fill="#14231A"/><path d="M44 54 L44 74 L50 75 L51 56 Z"/><path d="M64 56 L64 74 L70 75 L70 55 Z"/></svg>',
-  Leopard: '<svg viewBox="0 0 120 80"><path d="M22 40 C24 34 32 32 44 32 L80 32 C88 30 92 26 98 26 C106 26 112 30 112 36 C112 40 108 42 104 42 L96 44 C92 46 88 48 86 50 L86 72 L81 73 L80 52 L46 52 L42 72 L37 73 L36 52 C26 50 21 46 22 40 Z"/><path d="M24 38 C14 36 8 44 6 54 C4 64 8 70 14 70 C10 64 10 56 14 50 C16 46 20 44 25 44 Z"/><path d="M50 52 L52 72 L57 73 L56 52 Z"/><path d="M70 52 L70 72 L75 73 L76 51 Z"/><path d="M100 26 L102 20 L106 26 Z"/><circle cx="106" cy="32" r="1.3" fill="#F3F3E6"/><g fill="#F3F3E6" opacity=".6"><circle cx="34" cy="40" r="2"/><circle cx="42" cy="44" r="2.2"/><circle cx="50" cy="38" r="2"/><circle cx="58" cy="44" r="2.2"/><circle cx="66" cy="38" r="2"/><circle cx="74" cy="44" r="2"/><circle cx="82" cy="38" r="1.8"/><circle cx="46" cy="48" r="1.6"/><circle cx="62" cy="49" r="1.6"/><circle cx="12" cy="58" r="1.4"/></g></svg>',
-  Elephant: '<svg viewBox="0 0 160 110"><path d="M30 64 L28 104 Q34 107 42 104 L44 66 Z"/><path d="M98 64 L96 104 Q102 107 110 104 L110 64 Z"/><path d="M48 66 L48 104 Q54 107 62 104 L62 66 Z"/><path d="M82 66 L82 104 Q88 107 96 104 L94 66 Z"/><path d="M18 52 C16 30 36 16 66 15 C92 14 110 20 118 34 C124 46 122 62 114 70 C100 76 50 76 30 72 C22 68 19 62 18 52 Z"/><path d="M110 32 C112 20 124 13 136 16 C146 19 150 30 148 42 C147 50 144 56 140 60 L128 62 C118 60 112 50 110 32 Z"/><path d="M140 48 C146 58 150 72 148 86 C147 96 142 102 136 100 C134 99 134 96 136 94 C140 88 140 76 136 66 C134 60 132 56 132 52 Z"/><path d="M117 26 C106 28 100 40 102 54 C104 64 112 70 120 66 C126 62 128 52 127 42 C126 32 123 26 117 26 Z" fill="#3F5A48"/><path d="M133 60 C138 66 146 68 154 64 L154 66.5 C147 72 138 71 132 65 Z" fill="#F3F3E6"/><path d="M18 46 C12 52 10 62 11 70 L13.5 70 C13 62 15 54 20 49 Z"/></svg>',
-  Buffalo: '<svg viewBox="0 0 120 80"><path d="M14 38 C14 26 24 20 40 20 C52 18 64 16 74 20 C82 22 86 28 88 36 C90 46 86 52 80 54 L78 74 L72 75 L71 56 L36 56 L34 74 L28 75 L27 55 C18 52 14 46 14 38 Z"/><path d="M40 56 L40 74 L46 75 L47 56 Z"/><path d="M62 56 L62 74 L68 75 L68 55 Z"/><path d="M78 28 C86 26 94 30 98 38 C102 46 104 52 102 58 C100 62 94 62 92 58 C88 50 84 44 80 42 Z"/><path d="M80 26 C88 18 102 18 108 26 C112 32 112 40 108 46 C106 50 108 54 112 54 C108 58 102 56 101 50 C100 44 104 38 102 32 C100 28 94 26 90 28 C86 30 84 32 82 34 Z" fill="#0C1811"/><path d="M86 30 C80 30 74 34 72 38 C76 38 82 36 86 34 Z"/><circle cx="94" cy="40" r="1.3" fill="#F3F3E6"/><path d="M14 34 C9 40 8 50 9 58 L11.5 58 C11 50 12 42 16 37 Z"/></svg>',
-  Rhino: '<svg viewBox="0 0 120 80"><path d="M12 42 C12 28 24 22 40 22 L70 22 C80 22 86 28 88 36 C90 46 86 52 82 54 L80 72 L73 73 L72 56 L36 56 L34 72 L27 73 L26 55 C18 53 12 48 12 42 Z"/><path d="M40 56 L40 72 L47 73 L48 56 Z"/><path d="M62 56 L62 72 L69 73 L69 55 Z"/><path d="M80 30 C88 28 96 32 102 38 C108 42 112 48 112 54 C112 58 108 60 104 58 C98 56 92 54 86 52 C82 48 80 40 80 30 Z"/><path d="M104 46 C106 36 110 28 116 22 C116 32 114 42 110 50 Z"/><path d="M96 40 C97 34 99 30 102 28 C102 33 101 38 99 42 Z"/><path d="M84 28 L82 18 L88 26 Z"/><circle cx="92" cy="40" r="1.2" fill="#F3F3E6"/><path d="M12 38 C8 42 7 50 8 56 L10.5 56 C10 50 11 44 14 41 Z"/></svg>',
+  Lion: '<svg viewBox="0 0 120 80"><path d="M20 40 C20 32 28 28 40 28 L76 28 C84 28 88 34 88 42 C88 50 84 52 80 54 L80 74 L74 75 L73 56 L40 56 L38 74 L32 75 L31 55 C24 53 20 48 20 40 Z"/><path d="M22 36 C14 34 8 40 6 50 C5 56 7 60 10 58 C10 52 12 44 18 42 Z"/><ellipse cx="7.5" cy="60" rx="3.5" ry="4.5"/><path d="M78 30 C74 18 82 8 94 8 C106 8 114 16 114 28 C114 40 106 48 96 50 C86 50 80 42 78 30 Z"/><path d="M98 18 C104 16 112 20 113 28 C114 34 110 38 104 38 C98 38 94 32 94 26 C94 22 95 19 98 18 Z" fill="#7A5236"/><circle cx="104" cy="25" r="1.4" fill="#F4EBD9"/><path d="M110 32 L114 33 L111 36 Z" fill="#3B2416"/><path d="M44 54 L44 74 L50 75 L51 56 Z"/><path d="M64 56 L64 74 L70 75 L70 55 Z"/></svg>',
+  Leopard: '<svg viewBox="0 0 120 80"><path d="M22 40 C24 34 32 32 44 32 L80 32 C88 30 92 26 98 26 C106 26 112 30 112 36 C112 40 108 42 104 42 L96 44 C92 46 88 48 86 50 L86 72 L81 73 L80 52 L46 52 L42 72 L37 73 L36 52 C26 50 21 46 22 40 Z"/><path d="M24 38 C14 36 8 44 6 54 C4 64 8 70 14 70 C10 64 10 56 14 50 C16 46 20 44 25 44 Z"/><path d="M50 52 L52 72 L57 73 L56 52 Z"/><path d="M70 52 L70 72 L75 73 L76 51 Z"/><path d="M100 26 L102 20 L106 26 Z"/><circle cx="106" cy="32" r="1.3" fill="#F4EBD9"/><g fill="#F4EBD9" opacity=".6"><circle cx="34" cy="40" r="2"/><circle cx="42" cy="44" r="2.2"/><circle cx="50" cy="38" r="2"/><circle cx="58" cy="44" r="2.2"/><circle cx="66" cy="38" r="2"/><circle cx="74" cy="44" r="2"/><circle cx="82" cy="38" r="1.8"/><circle cx="46" cy="48" r="1.6"/><circle cx="62" cy="49" r="1.6"/><circle cx="12" cy="58" r="1.4"/></g></svg>',
+  Elephant: '<svg viewBox="0 0 160 110"><path d="M30 64 L28 104 Q34 107 42 104 L44 66 Z"/><path d="M98 64 L96 104 Q102 107 110 104 L110 64 Z"/><path d="M48 66 L48 104 Q54 107 62 104 L62 66 Z"/><path d="M82 66 L82 104 Q88 107 96 104 L94 66 Z"/><path d="M18 52 C16 30 36 16 66 15 C92 14 110 20 118 34 C124 46 122 62 114 70 C100 76 50 76 30 72 C22 68 19 62 18 52 Z"/><path d="M110 32 C112 20 124 13 136 16 C146 19 150 30 148 42 C147 50 144 56 140 60 L128 62 C118 60 112 50 110 32 Z"/><path d="M140 48 C146 58 150 72 148 86 C147 96 142 102 136 100 C134 99 134 96 136 94 C140 88 140 76 136 66 C134 60 132 56 132 52 Z"/><path d="M117 26 C106 28 100 40 102 54 C104 64 112 70 120 66 C126 62 128 52 127 42 C126 32 123 26 117 26 Z" fill="#7A5236"/><path d="M133 60 C138 66 146 68 154 64 L154 66.5 C147 72 138 71 132 65 Z" fill="#F4EBD9"/><path d="M18 46 C12 52 10 62 11 70 L13.5 70 C13 62 15 54 20 49 Z"/></svg>',
+  Buffalo: '<svg viewBox="0 0 120 80"><path d="M14 38 C14 26 24 20 40 20 C52 18 64 16 74 20 C82 22 86 28 88 36 C90 46 86 52 80 54 L78 74 L72 75 L71 56 L36 56 L34 74 L28 75 L27 55 C18 52 14 46 14 38 Z"/><path d="M40 56 L40 74 L46 75 L47 56 Z"/><path d="M62 56 L62 74 L68 75 L68 55 Z"/><path d="M78 28 C86 26 94 30 98 38 C102 46 104 52 102 58 C100 62 94 62 92 58 C88 50 84 44 80 42 Z"/><path d="M80 26 C88 18 102 18 108 26 C112 32 112 40 108 46 C106 50 108 54 112 54 C108 58 102 56 101 50 C100 44 104 38 102 32 C100 28 94 26 90 28 C86 30 84 32 82 34 Z" fill="#2A170C"/><path d="M86 30 C80 30 74 34 72 38 C76 38 82 36 86 34 Z"/><circle cx="94" cy="40" r="1.3" fill="#F4EBD9"/><path d="M14 34 C9 40 8 50 9 58 L11.5 58 C11 50 12 42 16 37 Z"/></svg>',
+  Rhino: '<svg viewBox="0 0 120 80"><path d="M12 42 C12 28 24 22 40 22 L70 22 C80 22 86 28 88 36 C90 46 86 52 82 54 L80 72 L73 73 L72 56 L36 56 L34 72 L27 73 L26 55 C18 53 12 48 12 42 Z"/><path d="M40 56 L40 72 L47 73 L48 56 Z"/><path d="M62 56 L62 72 L69 73 L69 55 Z"/><path d="M80 30 C88 28 96 32 102 38 C108 42 112 48 112 54 C112 58 108 60 104 58 C98 56 92 54 86 52 C82 48 80 40 80 30 Z"/><path d="M104 46 C106 36 110 28 116 22 C116 32 114 42 110 50 Z"/><path d="M96 40 C97 34 99 30 102 28 C102 33 101 38 99 42 Z"/><path d="M84 28 L82 18 L88 26 Z"/><circle cx="92" cy="40" r="1.2" fill="#F4EBD9"/><path d="M12 38 C8 42 7 50 8 56 L10.5 56 C10 50 11 44 14 41 Z"/></svg>',
 };
 
 function bigFive(log, summary) {
@@ -365,7 +422,7 @@ function rare(log) {
 function confetti() {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const c = $('confetti'); const x = c.getContext('2d'); c.width = innerWidth; c.height = innerHeight;
-  const cols = ['#F2C230', '#1D3A2B', '#3B7D52', '#C2452D', '#F3F3E6', '#ffffff'];
+  const cols = ['#E8B53C', '#C8742B', '#4E6B3A', '#8C3B1E', '#F6C46B', '#ffffff'];
   const ps = Array.from({ length: 140 }, () => ({ x: c.width / 2, y: 90, vx: (Math.random() - .5) * 14, vy: Math.random() * -9 - 2, r: Math.random() * 6 + 3, c: cols[Math.floor(Math.random() * cols.length)], a: Math.random() * 6, s: Math.random() * .3 - .15 }));
   let t = 0; (function f() { x.clearRect(0, 0, c.width, c.height); ps.forEach((p) => { p.vy += .28; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.a += p.s; x.save(); x.translate(p.x, p.y); x.rotate(p.a); x.fillStyle = p.c; x.fillRect(-p.r / 2, -p.r / 4, p.r, p.r / 2); x.restore(); }); if (++t < 170) requestAnimationFrame(f); else x.clearRect(0, 0, c.width, c.height); })();
 }
@@ -423,15 +480,15 @@ function drawMap(log) {
   }
   layer.clearLayers();
   const pts = log.filter((r) => r.lat != null);
-  const col = { Cam: '#2F6E8C', Melissa: '#C2452D', Keegan: '#3B7D52', Mark: '#7A3E9D', Tracy: '#D9731A' };
+  const col = { Cam: '#C8742B', Melissa: '#4E6B3A', Keegan: '#8C3B1E', Mark: '#2F6E8C', Tracy: '#9C4F9C' };
   pts.forEach((r) => {
     const rare = RARE.includes(r.rarity);
-    const m = L.circleMarker([r.lat, r.lng], { radius: rare ? 10 : 7, color: '#15241B', weight: 2, fillColor: rare ? '#F2C230' : (col[r.who] || '#2F6E8C'), fillOpacity: .95 });
+    const m = L.circleMarker([r.lat, r.lng], { radius: rare ? 10 : 7, color: '#3E2723', weight: 2, fillColor: rare ? '#E8B53C' : (col[r.who] || '#C8742B'), fillOpacity: .95 });
     const box = document.createElement('div'); box.append(el('b', null, r.species), document.createElement('br'), `${r.who || 'Someone'}, ${r.date} ${r.time}`.trim(), document.createElement('br'), r.rarity || '');
     m.bindPopup(box); m.addTo(layer);
   });
   if (pts.length) map.fitBounds(L.latLngBounds(pts.map((r) => [r.lat, r.lng])).pad(0.3), { maxZoom: 13 });
-  $('map-note').textContent = pts.length ? `${pts.length} sighting${pts.length === 1 ? '' : 's'} with GPS. Yellow dots are rare finds. Tap a dot for details.` : 'Pins appear here when sightings are logged with GPS.';
+  $('map-note').textContent = pts.length ? `${pts.length} sighting${pts.length === 1 ? '' : 's'} with GPS. Gold dots are rare finds. Tap a dot for details.` : 'Pins appear here when sightings are logged with GPS.';
 }
 function render(log, summary) {
   const n = log.length; const species = new Set(log.map((r) => r.species)).size;
