@@ -1,6 +1,6 @@
 // Safari Live works without signal: every page, font and script is stored on the phone
 // and served from there first, then refreshed quietly in the background.
-const CACHE = 'safari-v21';
+const CACHE = 'safari-v22';
 const TILES = 'safari-tiles';
 const SHELL = ['./', 'index.html', 'tick.html', 'comp.html', 'help.html', 'app.css', 'common.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png',
   'fonts/inter-400.woff2', 'fonts/inter-500.woff2', 'fonts/inter-600.woff2', 'fonts/inter-700.woff2', 'fonts/dmserif.woff2',

@@ -32,12 +32,16 @@ body{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 .chips::-webkit-scrollbar{display:none}
 .chips button{flex:none;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:7px 13px;font-size:15px;font-weight:500}
 .chips button.on{background:var(--bush);border-color:var(--bush);color:var(--bg);font-weight:700}
+.sel{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding-bottom:4px}
+.sel select{width:100%;min-width:0;font-size:15px;font-weight:500;padding:9px 10px;border-radius:12px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink)}
+.sel select.set{border-color:var(--bush);font-weight:700}
 .grp{display:flex;justify-content:space-between;align-items:baseline;padding:18px 14px 6px;font-family:var(--display);font-size:20px}
 .grp span{font-family:var(--body);font-weight:500;font-size:13px;color:var(--muted)}
 .rows{background:var(--panel);border-block:1px solid var(--line)}
-.sp{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px 14px;border-top:1px solid var(--line);content-visibility:auto;contain-intrinsic-size:auto 72px}
+.sp{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px 14px;border-top:1px solid var(--line);content-visibility:auto;contain-intrinsic-size:auto 110px}
 .sp:first-child{border-top:0}
 .sp h3{font-size:20px;color:var(--bush)}
+.sp .look{font-size:15px;margin-top:3px}
 .sp .meta{font-size:14px;color:var(--muted);margin-top:3px}
 .sp .meta b{font-weight:600;color:var(--ink)}
 .sp .seen{font-size:14px;color:var(--ok);font-weight:600;margin-top:4px}
@@ -73,9 +77,13 @@ body{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 </header>
 
 <div class="tools" id="tools">
-  <input class="search" id="q" type="search" placeholder="Search animals and birds" autocomplete="off" aria-label="Search animals and birds">
+  <input class="search" id="q" type="search" placeholder="Search by name or looks, like red bill" autocomplete="off" aria-label="Search animals and birds">
   <div class="chips" id="chips">
     <button data-f="all" class="on">All</button><button data-f="todo">Not seen yet</button><button data-f="Mammals">Mammals</button><button data-f="Birds">Birds</button><button data-f="Reptiles">Reptiles</button><button data-f="big5">Big Five</button>
+  </div>
+  <div class="sel">
+    <select id="fRar" aria-label="Filter by rarity"><option value="">Any rarity</option><option>Very Common</option><option>Common</option><option>Fairly Common</option><option>Uncommon</option><option>Rare</option><option>Very Rare</option><option value="rare+">All rare finds</option></select>
+    <select id="fCat" aria-label="Filter by group"><option value="">Any group</option></select>
   </div>
 </div>
 
@@ -117,19 +125,21 @@ const fmt = (ts) => new Date(ts).toLocaleString('en-GB', { day: 'numeric', month
 const pillCls = (r) => ({ 'Very Common': 'c', Common: 'c', 'Fairly Common': 'c', Uncommon: 'u', Occasional: 'u', Rare: 'r', 'Very Rare': 'v' }[r] || '');
 
 /* ---------- list ---------- */
+let fRar = ''; let fCat = '';
 function render() {
   $('me').textContent = me ? 'Switch person' : 'Sign in';
   const q = $('q').value.trim().toLowerCase();
   const pending = new Map(queue.map((i) => [key(i.tab, i.species), i]));
   const got = SPECIES.filter(([tab, sp]) => server[key(tab, sp)] || pending.has(key(tab, sp))).length;
   $('seenN').textContent = got; $('seenOf').textContent = `of ${SPECIES.length} species seen`; $('meter').style.width = (got / SPECIES.length) * 100 + '%';
-  const rows = SPECIES.filter(([tab, sp, rar, cat]) => (filter === 'all' || (filter === 'Mammals' && tab.endsWith('Mammals')) || (filter === 'Birds' && tab.endsWith('Birds')) || (filter === 'Reptiles' && tab.endsWith('Reptiles')) || (filter === 'big5' && cat === 'Big Five') || (filter === 'todo' && !server[key(tab, sp)] && !pending.has(key(tab, sp))))
-    && (!q || sp.toLowerCase().includes(q) || cat.toLowerCase().includes(q)))
+  const rows = SPECIES.filter(([tab, sp, rar, cat, , look]) => (filter === 'all' || (filter === 'Mammals' && tab.endsWith('Mammals')) || (filter === 'Birds' && tab.endsWith('Birds')) || (filter === 'Reptiles' && tab.endsWith('Reptiles')) || (filter === 'big5' && cat === 'Big Five') || (filter === 'todo' && !server[key(tab, sp)] && !pending.has(key(tab, sp))))
+    && (!fRar || rar === fRar || (fRar === 'rare+' && (rar === 'Rare' || rar === 'Very Rare'))) && (!fCat || cat === fCat)
+    && (!q || sp.toLowerCase().includes(q) || cat.toLowerCase().includes(q) || (look || '').toLowerCase().includes(q)))
     .sort((a, b) => (RANK[a[2]] || 9) - (RANK[b[2]] || 9) || a[1].localeCompare(b[1]));
   const list = document.createDocumentFragment();
-  if (!rows.length) list.appendChild(el('div', 'empty', q ? 'No species match that search.' : filter === 'todo' ? 'Everything here has been seen. Nice spotting!' : 'Nothing in this list.'));
+  if (!rows.length) list.appendChild(el('div', 'empty', q || fRar || fCat ? 'No species match. Try clearing the search or the dropdowns.' : filter === 'todo' ? 'Everything here has been seen. Nice spotting!' : 'Nothing in this list.'));
   let box = null; let last = null;
-  rows.forEach(([tab, sp, rar, cat, where]) => {
+  rows.forEach(([tab, sp, rar, cat, where, look]) => {
     if (rar !== last) {
       last = rar; const n = rows.filter((r) => r[2] === rar).length;
       const g = el('div', 'grp ' + rcls(rar), rar); g.appendChild(el('span', null, `${n} species`)); list.appendChild(g);
@@ -140,6 +150,7 @@ function render() {
     const info = el('div');
     info.appendChild(el('h3', null, sp));
     const meta = el('div', 'meta'); meta.append(el('b', null, tab.endsWith('Birds') ? 'Bird' : tab.endsWith('Reptiles') ? 'Reptile' : 'Mammal'), ' ' + where.charAt(0).toLowerCase() + where.slice(1));
+    if (look) info.appendChild(el('div', 'look', look));
     info.appendChild(meta);
     if (s) {
       info.appendChild(el('div', 'seen', `${s.who || 'Seen'}${s.when ? ', ' + s.when : ''}`));
@@ -192,7 +203,7 @@ $('cNo').onclick = closeConfirm;
 
 /* ---------- sync ---------- */
 let syncing = false; let syncMsg = '';
-const VERSION = 'v21';
+const VERSION = 'v22';
 async function sync(manual) {
   updateNet();
   if (!navigator.onLine) { if (manual) toast('No signal right now. Your ticks are safe on this phone.'); return; }
@@ -265,6 +276,9 @@ addEventListener('safari-login', () => { me = ls.get('me', ''); code = ls.get('c
 /* ---------- controls ---------- */
 $('chips').onclick = (e) => { const b = e.target.closest('button'); if (!b) return; filter = b.dataset.f; $('chips').querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); render(); };
 $('q').oninput = render;
+[...new Set(SPECIES.map((s) => s[3]))].sort().forEach((c) => { const o = document.createElement('option'); o.textContent = c; $('fCat').appendChild(o); });
+$('fRar').onchange = (e) => { fRar = e.target.value; e.target.classList.toggle('set', !!fRar); render(); scrollTo(0, 0); };
+$('fCat').onchange = (e) => { fCat = e.target.value; e.target.classList.toggle('set', !!fCat); render(); scrollTo(0, 0); };
 const setHH = () => document.documentElement.style.setProperty('--hh', $('hdr').offsetHeight + 'px'); addEventListener('resize', setHH);
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
