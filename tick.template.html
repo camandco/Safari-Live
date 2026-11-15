@@ -43,6 +43,8 @@ body{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 .sp .seen{font-size:14px;color:var(--ok);font-weight:600;margin-top:4px}
 .sp .wait{color:var(--warn)}
 .sp.is-seen h3{color:var(--muted)}
+.rm{display:block;margin-top:8px;border:0;background:none;padding:4px 0;font-size:14px;font-weight:600;color:var(--bad);text-decoration:underline}
+.rm.armed{background:var(--bad);color:#fff;text-decoration:none;border-radius:8px;padding:6px 12px}
 .sp .btn.done{opacity:1;min-width:88px;background:transparent;color:var(--ok);box-shadow:inset 0 0 0 1.5px var(--line)}
 .empty{text-align:center;padding:40px 16px}
 .queue{padding:6px 14px}
@@ -139,7 +141,10 @@ function render() {
     info.appendChild(el('h3', null, sp));
     const meta = el('div', 'meta'); meta.append(el('b', null, tab.endsWith('Birds') ? 'Bird' : tab.endsWith('Reptiles') ? 'Reptile' : 'Mammal'), ' ' + where.charAt(0).toLowerCase() + where.slice(1));
     info.appendChild(meta);
-    if (s) info.appendChild(el('div', 'seen', `${s.who || 'Seen'}${s.when ? ', ' + s.when : ''}`));
+    if (s) {
+      info.appendChild(el('div', 'seen', `${s.who || 'Seen'}${s.when ? ', ' + s.when : ''}`));
+      if (me === ADMIN) { const rm = el('button', 'rm', 'Remove this sighting'); let armed = false; rm.onclick = () => { if (!armed) { armed = true; rm.textContent = 'Tap again to remove'; rm.classList.add('armed'); setTimeout(() => { if (rm.isConnected) { armed = false; rm.textContent = 'Remove this sighting'; rm.classList.remove('armed'); } }, 4000); } else removeSighting(tab, sp, rm); }; info.appendChild(rm); }
+    }
     else if (p) info.appendChild(el('div', 'seen wait', `Waiting to sync. ${p.who}, ${fmt(p.ts)}`));
     const b = el('button', 'btn' + (s || p ? ' done' : ''), s || p ? '✓ Seen' : 'Seen it');
     if (!s && !p) b.onclick = () => ask(tab, sp, rar); else b.disabled = true;
@@ -187,7 +192,7 @@ $('cNo').onclick = closeConfirm;
 
 /* ---------- sync ---------- */
 let syncing = false; let syncMsg = '';
-const VERSION = 'v20';
+const VERSION = 'v21';
 async function sync(manual) {
   updateNet();
   if (!navigator.onLine) { if (manual) toast('No signal right now. Your ticks are safe on this phone.'); return; }
@@ -219,10 +224,26 @@ async function sync(manual) {
     if (manual) toast(syncMsg);
   } finally { syncing = false; updateNet(); render(); }
 }
+// Cam only: take a wrong sighting off the checklist for everyone.
+const ADMIN = 'Cam'; let removed = ls.get('removed', {});
+async function removeSighting(tab, sp, btn) {
+  if (!navigator.onLine) { toast('Removing a sighting needs signal. Try again at camp.'); return; }
+  btn.disabled = true; btn.textContent = 'Removing…';
+  try {
+    const res = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ code, action: 'remove', who: me, tab, species: sp }), redirect: 'follow' });
+    const d = await res.json();
+    if (d.ok && !d.removed) throw new Error('The sync script needs updating first. Paste in the latest Code.gs and deploy a new version.');
+    if (!d.ok) throw new Error(d.error === 'admin_only' ? 'Only Cam can remove sightings.' : d.error === 'not_found' ? 'That species is not on the sheet.' : /bad_tab|Unexpected/.test(d.error || '') || !d.error ? 'The sync script needs updating. Paste in the latest Code.gs and deploy a new version.' : d.error);
+    delete server[key(tab, sp)]; ls.set('server', server); removed[key(tab, sp)] = Date.now(); ls.set('removed', removed);
+    toast(`${sp} removed. Anyone can log it again.`); render();
+  } catch (e) { toast('Could not remove it: ' + (e.message.includes('JSON') || e.message === 'Failed to fetch' ? 'the sync script needs updating or there is no signal.' : e.message)); render(); }
+}
 async function pull() {
   const res = await fetch(LOG_CSV + '&t=' + Date.now()); if (!res.ok) return;
   const rows = parse(await res.text()).slice(1).filter((r) => r[4]);
   const map = {}; rows.forEach((r) => { const tab = `${r[3]} ${r[8] === 'Bird' ? 'Birds' : r[8] === 'Reptile' ? 'Reptiles' : 'Mammals'}`; map[key(tab, r[4])] = { who: r[2], when: `${r[0]} ${r[1]}`.trim() }; });
+  // the published sheet lags a few minutes, so keep just-removed sightings hidden until it catches up
+  Object.keys(removed).forEach((k) => { if (Date.now() - removed[k] > 15 * 60000) delete removed[k]; else delete map[k]; }); ls.set('removed', removed);
   server = map; ls.set('server', server); ls.set('pulledAt', Date.now());
 }
 function parse(text) { const rows = []; let row = []; let cell = ''; let q = false; for (let i = 0; i < text.length; i++) { const c = text[i]; if (q) { if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c; } else if (c === '"') q = true; else if (c === ',') { row.push(cell); cell = ''; } else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; } else if (c !== '\r') cell += c; } if (cell || row.length) { row.push(cell); rows.push(row); } return rows; }
