@@ -196,8 +196,9 @@ async function load() {
     const r = await fetch(`${SCRIPT_URL}?action=comp&code=${encodeURIComponent(code())}&me=${encodeURIComponent(me())}&gid=${GUEST ? gid() : ''}&t=${Date.now()}`);
     const d = await r.json();
     if (!d.ok) throw new Error(d.error === 'bad_code' ? (GUEST ? 'This voting link has expired. Ask Cam for the new one.' : 'Password is out of date. Log out and back in.') : d.error);
-    if (!d.entries || !d.voters) throw new Error('the sync script has not been updated for the photo comp yet. Cam needs to paste in the latest script and deploy a new version');
+    if (!d.entries) throw new Error('the sync script has not been updated for the photo comp yet. Cam needs to paste in the latest script and deploy a new version');
     state = d; render();
+    if (!d.voters) $('status').textContent = 'Entering works, but voting needs the latest sync script. Cam needs to paste in the new Code.gs and deploy a new version.';
     if (d.categories && d.categories.join('|') !== Object.keys(CAT_INFO).join('|')) $('status').textContent = 'The sync script still has the old categories. Cam needs to paste in the latest script and deploy a new version.';
   } catch (e) { $('status').textContent = 'Could not load the photo comp: ' + (e.message === 'Failed to fetch' || e.message.includes('JSON') ? 'the sync script has not been updated for the photo comp yet. Cam needs to paste in the latest script and deploy a new version.' : e.message); state = null; render(); }
 }
@@ -258,7 +259,7 @@ function photoCard(e, manage) {
 }
 function renderVote() {
   const box = $('voteList'); box.replaceChildren();
-  if (state.offline) { box.appendChild(el('div', 'empty', 'Voting opens once the photo comp is connected.')); return; }
+  if (state.offline || !state.voters) { box.appendChild(el('div', 'empty', 'Voting opens once the photo comp is connected and Cam has deployed the latest sync script.')); return; }
   state.categories.forEach((c) => {
     const list = state.entries.filter((e) => e.category === c);
     const per = state.votesPerCat || 2; const used = list.filter((e) => state.myVotes[e.id]).length;
