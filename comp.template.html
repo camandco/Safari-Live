@@ -88,7 +88,7 @@ td.r{text-align:right;font-variant-numeric:tabular-nums}
   <p id="heroP">Cam, Melissa, Keegan, Mark and Tracy. Nine shot briefs, one Photographer of the Trip.</p>
 </header>
 
-<div id="guestIn" class="wrap" hidden><div class="card"><h2>Welcome</h2><p class="note">You're invited to vote in our Kruger photo comp. Pick up to 2 favourite photos in each category. Who took which photo stays secret until the results are revealed.</p><label class="lbl" for="gName">Your name</label><input class="in" id="gName" maxlength="30" autocomplete="name" placeholder="So we know who voted"><button class="btn" id="gGo">Start voting</button><p class="msg err" id="gErr"></p></div></div>
+<div id="guestIn" class="wrap" hidden><div class="card"><h2>Welcome</h2><p class="note">You're invited to vote in our Kruger photo comp. Pick up to 2 favourite photos in each category. Who took which photo stays secret until the results are revealed.</p><label class="lbl" for="gName">Name</label><input class="in" id="gName" maxlength="20" autocomplete="given-name"><label class="lbl" for="gSur">Surname</label><input class="in" id="gSur" maxlength="20" autocomplete="family-name"><button class="btn" id="gGo">Start voting</button><p class="msg err" id="gErr"></p></div></div>
 
 <div id="locked" class="wrap" hidden><div class="card locked"><h2>Not on the list</h2><p class="note">The photo comp is just for Cam, Melissa, Keegan, Mark and Tracy.</p></div></div>
 
@@ -204,12 +204,12 @@ async function load() {
     if (d.categories && d.categories.join('|') !== Object.keys(CAT_INFO).join('|')) $('status').textContent = 'The sync script still has the old categories. Cam needs to paste in the latest script and deploy a new version.';
   } catch (e) { $('status').textContent = 'Could not load the photo comp: ' + (e.message === 'Failed to fetch' || e.message.includes('JSON') ? 'the sync script has not been updated for the photo comp yet. Cam needs to paste in the latest script and deploy a new version.' : e.message); state = null; render(); }
 }
-const ERR = { limit: 'You already have 2 entries in that category. Delete one first.', own_photo: "You can't vote for your own photo.", limit_votes: 'You have used both votes in this category. Remove one first.', closed: 'Voting has closed. The results are out.', bad_name: 'Enter your name first.', not_in_comp: 'Only the original five can enter.', bad_image: 'That photo could not be read. Try another.', admin_only: 'Only Cam can do that.' };
+const ERR = { limit: 'You already have 2 entries in that category. Delete one first.', own_photo: "You can't vote for your own photo.", limit_votes: 'You have used both votes in this category. Remove one first.', closed: 'Voting has closed. The results are out.', bad_name: 'Enter your name and surname first.', not_in_comp: 'Only the original five can enter.', bad_image: 'That photo could not be read. Try another.', admin_only: 'Only Cam can do that.' };
 
 /* ---------- gate ---------- */
 function gate() {
   if (GUEST) {
-    const has = !!me(); $('guestIn').hidden = has; $('app').hidden = !has;
+    const has = /\S\s+\S/.test(me()); $('guestIn').hidden = has; $('app').hidden = !has;
     $('heroP').textContent = 'Vote for your favourite photos from our Kruger trip.';
     if (has) { tab = 'vote'; document.querySelectorAll('.seg button').forEach((x) => x.classList.toggle('on', x.dataset.tab === 'vote')); ['enter', 'vote', 'results'].forEach((t) => { $('tab-' + t).hidden = t !== 'vote'; }); load(); }
     return;
@@ -219,8 +219,8 @@ function gate() {
   if (ok) load();
 }
 addEventListener('safari-login', gate);
-$('gGo').onclick = () => { const n = $('gName').value.trim(); if (n.length < 2) { $('gErr').textContent = 'Enter your name first.'; return; } localStorage.setItem('guestName', JSON.stringify(n)); gate(); };
-$('gName').onkeydown = (e) => { if (e.key === 'Enter') $('gGo').onclick(); };
+$('gGo').onclick = () => { const f = $('gName').value.trim(); const s = $('gSur').value.trim(); if (!f || !s) { $('gErr').textContent = 'Enter your name and surname.'; return; } localStorage.setItem('guestName', JSON.stringify(f + ' ' + s)); gate(); };
+$('gSur').onkeydown = (e) => { if (e.key === 'Enter') $('gGo').onclick(); };
 
 /* ---------- tabs ---------- */
 document.querySelectorAll('.seg button').forEach((b) => b.onclick = () => { tab = b.dataset.tab; document.querySelectorAll('.seg button').forEach((x) => x.classList.toggle('on', x === b)); ['enter', 'vote', 'results'].forEach((t) => { $('tab-' + t).hidden = t !== tab; }); scrollTo(0, 0); load(); });
