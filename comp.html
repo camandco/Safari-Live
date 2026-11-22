@@ -74,14 +74,21 @@ td.r{text-align:right;font-variant-numeric:tabular-nums}
 .brief .bb{font-size:15px;margin-top:2px}
 .brief .tp{font-size:14px;color:var(--muted);margin-top:4px}
 .lbl{display:block;font-size:14px;font-weight:600;margin:0 0 4px}
+.is-guest .seg{grid-template-columns:1fr 1fr}.is-guest .seg [data-tab=enter]{display:none}
+.vbtn{width:100%;margin-top:10px;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:11px;font-size:16px;font-weight:700}
+.vbtn.on{background:var(--gold);border-color:var(--gold);color:var(--gold-ink)}
+.vbtn:disabled{opacity:.45}
+.left{font-family:var(--body);font-weight:600;font-size:13px;color:var(--sign)}
 .hint{font-size:14px;color:var(--muted);margin:-4px 0 10px}
 </style>
 </head>
 <body data-page="comp">
 <header class="hero">
   <h1>Photo comp</h1>
-  <p>Cam, Melissa, Keegan, Mark and Tracy. Nine shot briefs, one Photographer of the Trip.</p>
+  <p id="heroP">Cam, Melissa, Keegan, Mark and Tracy. Nine shot briefs, one Photographer of the Trip.</p>
 </header>
+
+<div id="guestIn" class="wrap" hidden><div class="card"><h2>Welcome</h2><p class="note">You're invited to vote in our Kruger photo comp. Pick up to 2 favourite photos in each category. Who took which photo stays secret until the results are revealed.</p><label class="lbl" for="gName">Your name</label><input class="in" id="gName" maxlength="30" autocomplete="name" placeholder="So we know who voted"><button class="btn" id="gGo">Start voting</button><p class="msg err" id="gErr"></p></div></div>
 
 <div id="locked" class="wrap" hidden><div class="card locked"><h2>Not on the list</h2><p class="note">The photo comp is just for Cam, Melissa, Keegan, Mark and Tracy.</p></div></div>
 
@@ -107,7 +114,7 @@ td.r{text-align:right;font-variant-numeric:tabular-nums}
     </section>
 
     <section id="tab-vote" hidden>
-      <p class="note">Score every photo from 1 to 10. Photographers stay anonymous until the results are revealed. You can change a score any time. Tap a photo to see it full size.</p>
+      <p class="note" id="voteNote">You have 2 votes in each category, one per photo. You don't have to use both. Tap a photo to see it full size. You can change your votes until the results are revealed.</p>
       <div id="voteList"></div>
     </section>
 
@@ -177,9 +184,11 @@ const img = (id, w = 1200) => `https://drive.google.com/thumbnail?id=${encodeURI
 let justEntered = false; let state = null;
  let tab = 'enter'; let cat = 'Eye Contact'; let photo = null;
 
-const me = () => ls('me', ''); const code = () => ls('code', '');
+const GUEST = new URLSearchParams(location.search).get('guest') || '';
+const gid = () => { let g = ls('guestId', ''); if (!g) { g = Array.from(crypto.getRandomValues(new Uint8Array(8)), (b) => b.toString(16).padStart(2, '0')).join(''); localStorage.setItem('guestId', JSON.stringify(g)); } return g; };
+const me = () => GUEST ? ls('guestName', '') : ls('me', ''); const code = () => GUEST || ls('code', '');
 async function api(body) {
-  const res = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ code: code(), who: me() }, body)) });
+  const res = await fetch(SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ code: code(), who: me(), name: me(), gid: GUEST ? gid() : '' }, body)) });
   return res.json();
 }
 async function load() {
@@ -187,23 +196,31 @@ async function load() {
   if (!state) render();
   if (!navigator.onLine) { $('status').textContent = 'No signal. The photo comp needs signal to load.'; return; }
   try {
-    const r = await fetch(`${SCRIPT_URL}?action=comp&code=${encodeURIComponent(code())}&me=${encodeURIComponent(me())}&t=${Date.now()}`);
+    const r = await fetch(`${SCRIPT_URL}?action=comp&code=${encodeURIComponent(code())}&me=${encodeURIComponent(me())}&gid=${GUEST ? gid() : ''}&t=${Date.now()}`);
     const d = await r.json();
-    if (!d.ok) throw new Error(d.error === 'bad_code' ? 'Password is out of date. Log out and back in.' : d.error);
-    if (!d.entries) throw new Error('the sync script has not been updated for the photo comp yet. Cam needs to paste in the latest script and deploy a new version');
+    if (!d.ok) throw new Error(d.error === 'bad_code' ? (GUEST ? 'This voting link has expired. Ask Cam for the new one.' : 'Password is out of date. Log out and back in.') : d.error);
+    if (!d.entries || !d.voters) throw new Error('the sync script has not been updated for the photo comp yet. Cam needs to paste in the latest script and deploy a new version');
     state = d; render();
     if (d.categories && d.categories.join('|') !== Object.keys(CAT_INFO).join('|')) $('status').textContent = 'The sync script still has the old categories. Cam needs to paste in the latest script and deploy a new version.';
   } catch (e) { $('status').textContent = 'Could not load the photo comp: ' + (e.message === 'Failed to fetch' || e.message.includes('JSON') ? 'the sync script has not been updated for the photo comp yet. Cam needs to paste in the latest script and deploy a new version.' : e.message); state = null; render(); }
 }
-const ERR = { limit: 'You already have 2 entries in that category. Delete one first.', own_photo: "You can't score your own photo.", not_in_comp: 'Only the original five can enter.', bad_image: 'That photo could not be read. Try another.', admin_only: 'Only Cam can do that.' };
+const ERR = { limit: 'You already have 2 entries in that category. Delete one first.', own_photo: "You can't vote for your own photo.", limit_votes: 'You have used both votes in this category. Remove one first.', closed: 'Voting has closed. The results are out.', bad_name: 'Enter your name first.', not_in_comp: 'Only the original five can enter.', bad_image: 'That photo could not be read. Try another.', admin_only: 'Only Cam can do that.' };
 
 /* ---------- gate ---------- */
 function gate() {
+  if (GUEST) {
+    const has = !!me(); $('guestIn').hidden = has; $('app').hidden = !has;
+    $('heroP').textContent = 'Vote for your favourite photos from our Kruger trip.';
+    if (has) { tab = 'vote'; document.querySelectorAll('.seg button').forEach((x) => x.classList.toggle('on', x.dataset.tab === 'vote')); ['enter', 'vote', 'results'].forEach((t) => { $('tab-' + t).hidden = t !== 'vote'; }); load(); }
+    return;
+  }
   const ok = ORIGINALS.includes(me());
   $('locked').hidden = ok || !me(); $('app').hidden = !ok;
   if (ok) load();
 }
 addEventListener('safari-login', gate);
+$('gGo').onclick = () => { const n = $('gName').value.trim(); if (n.length < 2) { $('gErr').textContent = 'Enter your name first.'; return; } localStorage.setItem('guestName', JSON.stringify(n)); gate(); };
+$('gName').onkeydown = (e) => { if (e.key === 'Enter') $('gGo').onclick(); };
 
 /* ---------- tabs ---------- */
 document.querySelectorAll('.seg button').forEach((b) => b.onclick = () => { tab = b.dataset.tab; document.querySelectorAll('.seg button').forEach((x) => x.classList.toggle('on', x === b)); ['enter', 'vote', 'results'].forEach((t) => { $('tab-' + t).hidden = t !== tab; }); scrollTo(0, 0); load(); });
@@ -211,7 +228,7 @@ document.querySelectorAll('.seg button').forEach((b) => b.onclick = () => { tab 
 /* ---------- render ---------- */
 function render() {
   const live = !!state;
-  if (!state) state = { offline: true, categories: Object.keys(CAT_INFO), max: 2, entries: [], myVotes: {}, voted: {}, votable: {}, people: ORIGINALS, revealed: false, admin: false };
+  if (!state) state = { offline: true, categories: Object.keys(CAT_INFO), max: 2, votesPerCat: 2, entries: [], myVotes: {}, voters: [], people: ORIGINALS, revealed: false, admin: false };
   const cats = Object.keys(CAT_INFO);
   if (state.categories.join('|') !== cats.join('|')) state.scriptOld = true;
   state.categories = cats;
@@ -237,7 +254,8 @@ function photoCard(e, manage) {
   const c = el('div', 'photo');
   const im = el('img', 'img'); im.loading = 'lazy'; im.src = img(e.fileId, 800); im.alt = e.title || e.category; im.onclick = () => zoom(e.fileId); c.appendChild(im);
   const b = el('div', 'b'); b.appendChild(el('div', 't', e.title || e.category));
-  b.appendChild(el('div', 'w', manage ? `${e.category} · ${e.votes} vote${e.votes === 1 ? '' : 's'}` : (state.revealed && e.who ? `by ${e.who}` : `${e.votes} vote${e.votes === 1 ? '' : 's'} so far`)));
+  const vt = (n) => `${n} vote${n === 1 ? '' : 's'}`;
+  b.appendChild(el('div', 'w', state.revealed ? `${manage ? e.category : 'by ' + e.who}, ${vt(e.score || 0)}` : (manage ? e.category : '')));
   if (manage) { const d = el('button', 'del', 'Delete entry'); d.onclick = async () => { if (!confirm('Delete this entry? Its votes go too.')) return; const r = await api({ action: 'delete', entryId: e.id }); if (!r.ok) $('status').textContent = ERR[r.error] || r.error; load(); }; b.appendChild(d); }
   c.appendChild(b); return c;
 }
@@ -246,17 +264,25 @@ function renderVote() {
   if (state.offline) { box.appendChild(el('div', 'empty', 'Voting opens once the photo comp is connected.')); return; }
   state.categories.forEach((c) => {
     const list = state.entries.filter((e) => e.category === c);
-    const card = el('div', 'card'); const h = el('h3', null, `${(CAT_INFO[c] || {}).icon || ''} ${c}`); h.appendChild(el('small', null, `${list.length} entr${list.length === 1 ? 'y' : 'ies'}`)); card.append(h, el('p', 'note', (CAT_INFO[c] || {}).brief || ''));
+    const per = state.votesPerCat || 2; const used = list.filter((e) => state.myVotes[e.id]).length;
+    const card = el('div', 'card'); const h = el('h3', null, `${(CAT_INFO[c] || {}).icon || ''} ${c}`); h.appendChild(el('small', null, `${list.length} entr${list.length === 1 ? 'y' : 'ies'}`)); if (list.length && !state.revealed) h.appendChild(el('span', 'left', `${used} of ${per} votes used`)); card.append(h, el('p', 'note', (CAT_INFO[c] || {}).brief || ''));
     if (!list.length) card.appendChild(el('div', 'empty', 'No entries yet.'));
     else {
       const g = el('div', 'grid');
       list.forEach((e) => {
         const pc = photoCard(e, false); const b = pc.querySelector('.b');
         if (e.mine) b.appendChild(el('div', 'own', 'Your photo, so no vote from you'));
-        else {
-          const row = el('div', 'scores');
-          for (let s = 1; s <= 10; s++) { const btn = el('button', state.myVotes[e.id] === s ? 'on' : '', String(s)); btn.onclick = async () => { row.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === btn)); state.myVotes[e.id] = s; const r = await api({ action: 'vote', entryId: e.id, score: s }).catch(() => ({ ok: false, error: 'No signal, vote not saved' })); if (!r.ok) { $('status').textContent = ERR[r.error] || r.error; btn.classList.remove('on'); } }; row.appendChild(btn); }
-          b.appendChild(row);
+        else if (!state.revealed) {
+          const on = !!state.myVotes[e.id];
+          const btn = el('button', 'vbtn' + (on ? ' on' : ''), on ? '★ Your vote. Tap to remove' : 'Vote for this photo');
+          btn.disabled = !on && used >= per;
+          btn.onclick = async () => {
+            btn.disabled = true; const want = !on;
+            const r = await api({ action: 'vote', entryId: e.id, on: want }).catch(() => ({ ok: false, error: 'No signal, so the vote was not saved. Try again when you have signal.' }));
+            if (!r.ok) { $('status').textContent = ERR[r.error] || r.error; btn.disabled = false; return; }
+            $('status').textContent = ''; if (want) state.myVotes[e.id] = true; else delete state.myVotes[e.id]; render();
+          };
+          b.appendChild(btn);
         }
         g.appendChild(pc);
       });
@@ -264,24 +290,26 @@ function renderVote() {
     }
     box.appendChild(card);
   });
+  const cast = Object.keys(state.myVotes).length; const cats = state.categories.filter((c) => state.entries.some((e) => e.category === c && !e.mine)).length;
   box.appendChild(el('div', 'card'));
-  box.lastChild.append(el('h3', null, 'Your progress'), el('p', 'note', `You've scored ${Object.keys(state.myVotes).length} of ${state.entries.filter((e) => !e.mine).length} photos.`));
+  box.lastChild.append(el('h3', null, 'Your votes'), el('p', 'note', `You've used ${cast} of up to ${cats * (state.votesPerCat || 2)} votes. Votes save as you tap.`));
 }
 function renderResults() {
   const box = $('results'); box.replaceChildren();
   if (state.offline) { box.appendChild(el('div', 'empty', 'Results appear once the photo comp is connected.')); return; }
-  const prog = el('div', 'card'); prog.append(el('h2', null, 'Voting progress'), el('p', 'note', 'Photos scored by each person.'));
-  state.people.forEach((p) => { const n = state.voted[p] || 0; const of = (state.votable || {})[p] || 0; const r = el('div', 'prog'); const t = el('div', 'track'); const f = el('div', 'fill'); f.style.width = `${of ? Math.min(100, (n / of) * 100) : 0}%`; t.appendChild(f); r.append(el('div', null, p), t, el('div', 'n', `${n} of ${of}`)); prog.appendChild(r); });
-  if (state.admin) { const b = el('button', 'btn' + (state.revealed ? ' alt' : ''), state.revealed ? 'Hide results again' : 'Reveal the results'); b.style.marginTop = '12px'; b.onclick = async () => { const r = await api({ action: 'reveal', value: !state.revealed }); if (!r.ok) $('status').textContent = ERR[r.error] || r.error; load(); }; prog.appendChild(b); }
-  if (!state.revealed) { box.appendChild(el('div', 'card')); box.lastChild.append(el('h2', null, 'Results are hidden'), el('p', 'note', state.admin ? 'Reveal them when everyone has voted.' : 'Cam will reveal them once everyone has voted.')); box.appendChild(prog); return; }
+  const prog = el('div', 'card'); prog.append(el('h2', null, 'Who has voted'), el('p', 'note', 'Votes used so far. Everyone gets up to 2 per category, guests included.'));
+  const of = state.categories.length * (state.votesPerCat || 2);
+  (state.voters || []).forEach((v) => { const r = el('div', 'prog'); const t = el('div', 'track'); const f = el('div', 'fill'); f.style.width = `${Math.min(100, (v.n / of) * 100)}%`; t.appendChild(f); r.append(el('div', null, v.name), t, el('div', 'n', `${v.n}`)); prog.appendChild(r); });
+  if (state.admin && !state.guest) { const b = el('button', 'btn' + (state.revealed ? ' alt' : ''), state.revealed ? 'Hide results again' : 'Reveal the results'); b.style.marginTop = '12px'; b.onclick = async () => { const r = await api({ action: 'reveal', value: !state.revealed }); if (!r.ok) $('status').textContent = ERR[r.error] || r.error; load(); }; prog.appendChild(b); }
+  if (!state.revealed) { box.appendChild(el('div', 'card')); box.lastChild.append(el('h2', null, 'Results are hidden'), el('p', 'note', state.admin ? 'Reveal them when everyone has voted. Voting closes once the results are out.' : 'Cam will reveal them once everyone has voted.')); box.appendChild(prog); return; }
   const pts = Object.fromEntries(state.people.map((p) => [p, { p, pts: 0, gold: 0 }]));
   const cats = el('div');
   state.categories.forEach((c) => {
-    const ranked = state.entries.filter((e) => e.category === c && e.score != null).sort((a, b) => b.score - a.score).slice(0, 3);
+    const ranked = state.entries.filter((e) => e.category === c && e.score > 0).sort((a, b) => b.score - a.score).slice(0, 3);
     ranked.forEach((e, i) => { if (pts[e.who]) { pts[e.who].pts += 3 - i; if (i === 0) pts[e.who].gold++; } });
     const card = el('div', 'card'); card.appendChild(el('h3', null, `${(CAT_INFO[c] || {}).icon || ''} ${c}`));
-    if (!ranked.length) card.appendChild(el('div', 'empty', 'No scored entries.'));
-    else { const pod = el('div', 'pod'); ranked.forEach((e, i) => { const p = el('div', 'p p' + (i + 1)); const im = el('img'); im.src = img(e.fileId, 600); im.onclick = () => zoom(e.fileId); p.append(el('div', 'm', ['🥇', '🥈', '🥉'][i]), im, el('div', 'who', e.who), el('div', 'sc', `${e.score} avg${e.title ? ' · ' + e.title : ''}`)); pod.appendChild(p); }); card.appendChild(pod); }
+    if (!ranked.length) card.appendChild(el('div', 'empty', 'No votes in this category.'));
+    else { const pod = el('div', 'pod'); ranked.forEach((e, i) => { const p = el('div', 'p p' + (i + 1)); const im = el('img'); im.src = img(e.fileId, 600); im.onclick = () => zoom(e.fileId); p.append(el('div', 'm', ['🥇', '🥈', '🥉'][i]), im, el('div', 'who', e.who), el('div', 'sc', `${e.score} vote${e.score === 1 ? '' : 's'}${e.title ? ', ' + e.title : ''}`)); pod.appendChild(p); }); card.appendChild(pod); }
     cats.appendChild(card);
   });
   const table = Object.values(pts).sort((a, b) => b.pts - a.pts || b.gold - a.gold);

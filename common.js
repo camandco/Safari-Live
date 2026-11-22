@@ -3,6 +3,8 @@
   const PASS_HASH = '998ad19e808bf5071db74ee711377d5b4b59e0381fb26f8667286747e1708139';
   const NAMES = ['Cam', 'Melissa', 'Keegan', 'Mark', 'Tracy'];
   const page = document.body.dataset.page || 'dashboard';
+  // Guests open the photo comp with a voting link: no password, no menu.
+  if (page === 'comp' && new URLSearchParams(location.search).get('guest')) { document.body.classList.add('is-guest'); return; }
   const ls = {
     get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
@@ -41,7 +43,7 @@
   const sw = el('button'); sw.type = 'button'; sw.append(icon('user'), 'Switch person');
   const out = el('button'); out.type = 'button'; out.append(icon('lock'), 'Log out');
   links.append(sw, out);
-  drawer.append(head, links, el('div', 'sx-ver', 'Works without signal. Version 23.'));
+  drawer.append(head, links, el('div', 'sx-ver', 'Works without signal. Version 24.'));
   document.body.append(shade, drawer);
   const openMenu = (o) => { drawer.classList.toggle('open', o); shade.classList.toggle('open', o); };
   burger.onclick = () => openMenu(true); shade.onclick = () => openMenu(false);
