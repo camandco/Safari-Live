@@ -257,11 +257,14 @@ function photoCard(e, manage) {
   if (manage) { const d = el('button', 'del', 'Delete entry'); d.onclick = async () => { if (!confirm('Delete this entry? Its votes go too.')) return; const r = await api({ action: 'delete', entryId: e.id }); if (!r.ok) $('status').textContent = ERR[r.error] || r.error; load(); }; b.appendChild(d); }
   c.appendChild(b); return c;
 }
+// Each person sees the photos in their own random order, which stays the same while they vote.
+const SEED = (() => { let s = ls('shuffleSeed', ''); if (!s) { s = Math.random().toString(36).slice(2); localStorage.setItem('shuffleSeed', JSON.stringify(s)); } return s; })();
+const mix = (id) => { let h = 2166136261; for (const ch of SEED + id) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
 function renderVote() {
   const box = $('voteList'); box.replaceChildren();
   if (state.offline || !state.voters) { box.appendChild(el('div', 'empty', 'Voting opens once the photo comp is connected and Cam has deployed the latest sync script.')); return; }
   state.categories.forEach((c) => {
-    const list = state.entries.filter((e) => e.category === c);
+    const list = state.entries.filter((e) => e.category === c).sort((a, b) => mix(a.id) - mix(b.id));
     const per = state.votesPerCat || 2; const used = list.filter((e) => state.myVotes[e.id]).length;
     const card = el('div', 'card'); const h = el('h3', null, `${(CAT_INFO[c] || {}).icon || ''} ${c}`); h.appendChild(el('small', null, `${list.length} entr${list.length === 1 ? 'y' : 'ies'}`)); if (list.length && !state.revealed) h.appendChild(el('span', 'left', `${used} of ${per} votes used`)); card.append(h, el('p', 'note', (CAT_INFO[c] || {}).brief || ''));
     if (!list.length) card.appendChild(el('div', 'empty', 'No entries yet.'));
