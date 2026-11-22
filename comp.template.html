@@ -237,7 +237,7 @@ function photoCard(e, manage) {
   const c = el('div', 'photo');
   const im = el('img', 'img'); im.loading = 'lazy'; im.src = img(e.fileId, 800); im.alt = e.title || e.category; im.onclick = () => zoom(e.fileId); c.appendChild(im);
   const b = el('div', 'b'); b.appendChild(el('div', 't', e.title || 'Untitled'));
-  b.appendChild(el('div', 'w', manage ? `${e.category} · ${e.votes} vote${e.votes === 1 ? '' : 's'}` : (e.who ? `by ${e.who}` : `${e.votes} vote${e.votes === 1 ? '' : 's'} so far`)));
+  b.appendChild(el('div', 'w', manage ? `${e.category} · ${e.votes} vote${e.votes === 1 ? '' : 's'}` : (state.revealed && e.who ? `by ${e.who}` : `${e.votes} vote${e.votes === 1 ? '' : 's'} so far`)));
   if (manage) { const d = el('button', 'del', 'Delete entry'); d.onclick = async () => { if (!confirm('Delete this entry? Its votes go too.')) return; const r = await api({ action: 'delete', entryId: e.id }); if (!r.ok) $('status').textContent = ERR[r.error] || r.error; load(); }; b.appendChild(d); }
   c.appendChild(b); return c;
 }
